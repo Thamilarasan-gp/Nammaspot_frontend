@@ -1,4 +1,6 @@
 import React from "react";
+import 'leaflet/dist/leaflet.css';
+import 'leaflet-control-geocoder/dist/Control.Geocoder.css';
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./USER1/Login/Login";
