@@ -32,6 +32,7 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import Review from './USER1/Review'
 import AProfilePage from "./Profile/AProfile";
 import Myslots from "./ADMIN1/Admin_home/Myslots";
+import ParkingLot from "./ParkingLot";
 
 const queryClient = new QueryClient();
 
@@ -69,9 +70,9 @@ function App() {
          <Route path="/mybooking" element={<Mybooking/>}></Route>
          <Route path="routemap" element={<Routemap/>}></Route>
          <Route path="/review" element={<Review/>}></Route> 
-
+ 
          <Route path="/aprofile" element={<AProfilePage/>}></Route> 
-
+<Route path="/parkinglot" element={<ParkingLot/>}></Route> 
          <Route path="/myslots" element={<Myslots/>}></Route> 
         </Routes>
       </BrowserRouter>
