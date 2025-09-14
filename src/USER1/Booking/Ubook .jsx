@@ -1,58 +1,443 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Html, Text } from '@react-three/drei';
+import { OrbitControls, Html, Environment, Text } from '@react-three/drei';
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from 'axios';
 import * as THREE from 'three';
+import { Car, Clock, Calendar, MapPin, DollarSign, AlertCircle, Loader2, MousePointer, ZoomIn, RotateCw, Info, ArrowRight, CarFront, SparklesIcon, Vibrate as GateEntrance, Satellite as GateExit, Navigation, CarTaxiFront, Camera, Shield, TreePine, Building2, Trash2, Zap, Users } from 'lucide-react';
 import "./Ubook.css";
 
-// Car Model Component
-const CarModel = ({ position, visible }) => {
-  const meshRef = useRef();
+// Enhanced Car Model with realistic parking behavior
+const CarModel = ({ 
+  position, 
+  visible, 
+  isArriving, 
+  color = "#007AFF", 
+  carType = "sedan",
+  targetPosition,
+  targetRotation = [0, 0, 0],
+  onArrivalComplete,
+  isParked = false,
+  licensePlate = "ABC123"
+}) => {
+  const groupRef = useRef();
+  const [currentPosition, setCurrentPosition] = useState(position);
+  const [rotation, setRotation] = useState([0, 0, 0]);
+  const [isMoving, setIsMoving] = useState(false);
+  const [headlightIntensity, setHeadlightIntensity] = useState(0);
+  const [brakeLights, setBrakeLights] = useState(false);
   
-  useFrame(() => {
-    if (meshRef.current && visible) {
-      // Subtle animation for the car
-      meshRef.current.rotation.y += 0.01;
+  // Car type configurations
+  const carConfigs = {
+    sedan: {
+      bodySize: [1.6, 0.5, 3.2],
+      topSize: [1.3, 0.3, 2.2],
+      wheelOffset: 0.7,
+      color: color
+    },
+    suv: {
+      bodySize: [1.8, 0.7, 3.5],
+      topSize: [1.4, 0.4, 2.5],
+      wheelOffset: 0.8,
+      color: color
+    },
+    compact: {
+      bodySize: [1.4, 0.4, 2.8],
+      topSize: [1.2, 0.25, 2.0],
+      wheelOffset: 0.6,
+      color: color
+    }
+  };
+
+  const config = carConfigs[carType] || carConfigs.sedan;
+
+  // Enhanced pathfinding with more realistic routes
+  useEffect(() => {
+    if (isArriving && visible && targetPosition) {
+      setIsMoving(true);
+      setHeadlightIntensity(0.8);
+      
+      // Create more sophisticated waypoints based on parking lot layout
+      const entrancePos = [0, 0.2, -65]; // Start from main entrance
+      const mainRoadPoint = [0, 0.2, -45]; // Enter main road
+      
+      // Determine which section the target is in
+      const targetX = targetPosition[0];
+      const targetZ = targetPosition[2];
+      
+      // Create section-based routing
+      let sectionEntryPoint;
+      if (targetX < -15) {
+        sectionEntryPoint = [-20, 0.2, -20]; // Left section
+      } else if (targetX > 15) {
+        sectionEntryPoint = [20, 0.2, -20]; // Right section
+      } else {
+        sectionEntryPoint = [0, 0.2, -20]; // Center section
+      }
+      
+      const approachPoint = [targetX * 0.8, 0.2, targetZ - 8];
+      const finalApproach = [targetX, 0.2, targetZ - 3];
+      
+      const waypoints = [
+        entrancePos,
+        mainRoadPoint,
+        sectionEntryPoint,
+        approachPoint,
+        finalApproach,
+        targetPosition
+      ];
+      
+      let currentWaypoint = 0;
+      const animationDuration = 8000; // 8 seconds for more realistic timing
+      const startTime = Date.now();
+      
+      const animateMovement = () => {
+        const elapsed = Date.now() - startTime;
+        const totalProgress = Math.min(elapsed / animationDuration, 1);
+        
+        // Calculate position along path with easing
+        const segmentProgress = (totalProgress * (waypoints.length - 1)) % 1;
+        const segmentIndex = Math.floor(totalProgress * (waypoints.length - 1));
+        
+        if (segmentIndex < waypoints.length - 1) {
+          const start = waypoints[segmentIndex];
+          const end = waypoints[segmentIndex + 1];
+          
+          // Apply different easing for different segments
+          let easedProgress;
+          if (segmentIndex === 0) {
+            // Slow start from entrance
+            easedProgress = segmentProgress * segmentProgress;
+          } else if (segmentIndex >= waypoints.length - 2) {
+            // Slow down for parking
+            easedProgress = 1 - Math.pow(1 - segmentProgress, 3);
+          } else {
+            // Normal speed on roads
+            easedProgress = segmentProgress;
+          }
+          
+          const newPosition = [
+            start[0] + (end[0] - start[0]) * easedProgress,
+            start[1] + (end[1] - start[1]) * easedProgress,
+            start[2] + (end[2] - start[2]) * easedProgress
+          ];
+          
+          // Calculate rotation to face movement direction
+          const direction = [end[0] - start[0], 0, end[2] - start[2]];
+          const angle = Math.atan2(direction[0], direction[2]);
+          setRotation([0, angle, 0]);
+          
+          // Activate brake lights when approaching final position
+          if (segmentIndex >= waypoints.length - 2 && segmentProgress > 0.5) {
+            setBrakeLights(true);
+          }
+          
+          setCurrentPosition(newPosition);
+        }
+        
+        if (totalProgress < 1) {
+          requestAnimationFrame(animateMovement);
+        } else {
+          setIsMoving(false);
+          setCurrentPosition(targetPosition);
+          setRotation(targetRotation);
+          setHeadlightIntensity(0);
+          setBrakeLights(false);
+          if (onArrivalComplete) onArrivalComplete();
+        }
+      };
+      
+      requestAnimationFrame(animateMovement);
+    } else if (visible) {
+      setCurrentPosition(position);
+      setRotation(targetRotation);
+    }
+  }, [isArriving, visible, targetPosition, targetRotation]);
+
+  useFrame((state) => {
+    if (groupRef.current && !isMoving && isParked) {
+      // Subtle idle animation for parked cars
+      groupRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 0.5) * 0.02;
     }
   });
 
   if (!visible) return null;
 
   return (
-    <group position={position} ref={meshRef}>
+    <group position={currentPosition} rotation={rotation} ref={groupRef}>
       {/* Car body */}
-      <mesh position={[0, 0.5, 0]}>
-        <boxGeometry args={[1.5, 0.5, 3]} />
-        <meshStandardMaterial color="#ff4444" />
+      <mesh position={[0, 0.4, 0]} castShadow>
+        <boxGeometry args={config.bodySize} />
+        <meshStandardMaterial color={config.color} metalness={0.8} roughness={0.2} />
       </mesh>
-      {/* Car top */}
-      <mesh position={[0, 1, 0]}>
-        <boxGeometry args={[1.2, 0.3, 2]} />
-        <meshStandardMaterial color="#ff4444" />
+      
+      {/* Car roof */}
+      <mesh position={[0, 0.95, 0.1]} castShadow>
+        <boxGeometry args={config.topSize} />
+        <meshStandardMaterial color={config.color} metalness={0.7} roughness={0.3} />
       </mesh>
-      {/* Wheels */}
-      <mesh position={[-0.7, 0.2, 1]}>
-        <cylinderGeometry args={[0.3, 0.3, 0.2, 16]} />
-        <meshStandardMaterial color="#333333" />
+      
+      {/* Windshield */}
+      <mesh position={[0, 0.95, 0.9]} castShadow>
+        <boxGeometry args={[config.topSize[0] - 0.05, config.topSize[1] - 0.05, 0.8]} />
+        <meshStandardMaterial color="#87ceeb" transparent opacity={0.6} />
       </mesh>
-      <mesh position={[0.7, 0.2, 1]}>
-        <cylinderGeometry args={[0.3, 0.3, 0.2, 16]} />
-        <meshStandardMaterial color="#333333" />
+      
+      {/* Side windows */}
+      <mesh position={[config.wheelOffset, 0.95, 0.1]} castShadow>
+        <boxGeometry args={[0.02, config.topSize[1] - 0.05, 1.8]} />
+        <meshStandardMaterial color="#87ceeb" transparent opacity={0.6} />
       </mesh>
-      <mesh position={[-0.7, 0.2, -1]}>
-        <cylinderGeometry args={[0.3, 0.3, 0.2, 16]} />
-        <meshStandardMaterial color="#333333" />
+      <mesh position={[-config.wheelOffset, 0.95, 0.1]} castShadow>
+        <boxGeometry args={[0.02, config.topSize[1] - 0.05, 1.8]} />
+        <meshStandardMaterial color="#87ceeb" transparent opacity={0.6} />
       </mesh>
-      <mesh position={[0.7, 0.2, -1]}>
-        <cylinderGeometry args={[0.3, 0.3, 0.2, 16]} />
-        <meshStandardMaterial color="#333333" />
+      
+      {/* Rear window */}
+      <mesh position={[0, 0.95, -0.8]} castShadow>
+        <boxGeometry args={[config.topSize[0] - 0.1, config.topSize[1] - 0.05, 0.6]} />
+        <meshStandardMaterial color="#87ceeb" transparent opacity={0.5} />
+      </mesh>
+      
+      {/* Enhanced headlights with dynamic intensity */}
+      <mesh position={[0.6, 0.5, config.bodySize[2]/2]} castShadow>
+        <sphereGeometry args={[0.2, 16, 16]} />
+        <meshStandardMaterial 
+          color="#ffffff" 
+          emissive="#ffffff" 
+          emissiveIntensity={headlightIntensity} 
+        />
+      </mesh>
+      <mesh position={[-0.6, 0.5, config.bodySize[2]/2]} castShadow>
+        <sphereGeometry args={[0.2, 16, 16]} />
+        <meshStandardMaterial 
+          color="#ffffff" 
+          emissive="#ffffff" 
+          emissiveIntensity={headlightIntensity} 
+        />
+      </mesh>
+      
+      {/* LED strip lights */}
+      <mesh position={[0, 0.4, config.bodySize[2]/2 + 0.1]} castShadow>
+        <boxGeometry args={[1.4, 0.05, 0.1]} />
+        <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={1.2} />
+      </mesh>
+      
+      {/* Taillights with brake light effect */}
+      <mesh position={[0.5, 0.5, -config.bodySize[2]/2]} castShadow>
+        <sphereGeometry args={[0.15, 16, 16]} />
+        <meshStandardMaterial 
+          color="#ff0000" 
+          emissive="#ff0000" 
+          emissiveIntensity={brakeLights ? 1.5 : 0.5} 
+        />
+      </mesh>
+      <mesh position={[-0.5, 0.5, -config.bodySize[2]/2]} castShadow>
+        <sphereGeometry args={[0.15, 16, 16]} />
+        <meshStandardMaterial 
+          color="#ff0000" 
+          emissive="#ff0000" 
+          emissiveIntensity={brakeLights ? 1.5 : 0.5} 
+        />
+      </mesh>
+      
+      {/* Detailed wheels with rims */}
+      {[[-config.wheelOffset, 1], [config.wheelOffset, 1], [-config.wheelOffset, -1], [config.wheelOffset, -1]].map((pos, i) => (
+        <group key={i} position={[pos[0], 0.2, pos[1]]}>
+          {/* Tire */}
+          <mesh rotation={[Math.PI/2, 0, 0]} castShadow>
+            <cylinderGeometry args={[0.35, 0.35, 0.3, 16]} />
+            <meshStandardMaterial color="#1f2937" roughness={0.9} />
+          </mesh>
+          {/* Rim */}
+          <mesh rotation={[Math.PI/2, 0, 0]} position={[0, 0, 0.1]} castShadow>
+            <cylinderGeometry args={[0.25, 0.25, 0.1, 16]} />
+            <meshStandardMaterial color="#c0c0c0" metalness={0.9} roughness={0.1} />
+          </mesh>
+        </group>
+      ))}
+      
+      {/* License plates */}
+      <mesh position={[0, 0.3, config.bodySize[2]/2 + 0.05]} castShadow>
+        <boxGeometry args={[0.6, 0.2, 0.05]} />
+        <meshStandardMaterial color="#ffffff" />
+      </mesh>
+      <Html position={[0, 0.3, config.bodySize[2]/2 + 0.08]} center>
+        <div className="us-bk-license-plate">{licensePlate}</div>
+      </Html>
+      
+      <mesh position={[0, 0.6, -config.bodySize[2]/2 - 0.05]} castShadow>
+        <boxGeometry args={[0.6, 0.2, 0.05]} />
+        <meshStandardMaterial color="#ffffff" />
+      </mesh>
+      <Html position={[0, 0.6, -config.bodySize[2]/2 - 0.08]} center rotation={[0, Math.PI, 0]}>
+        <div className="us-bk-license-plate">{licensePlate}</div>
+      </Html>
+      
+      {/* Side mirrors */}
+      <mesh position={[config.wheelOffset + 0.1, 0.8, 0.6]} castShadow>
+        <boxGeometry args={[0.1, 0.08, 0.15]} />
+        <meshStandardMaterial color={config.color} metalness={0.7} roughness={0.3} />
+      </mesh>
+      <mesh position={[-(config.wheelOffset + 0.1), 0.8, 0.6]} castShadow>
+        <boxGeometry args={[0.1, 0.08, 0.15]} />
+        <meshStandardMaterial color={config.color} metalness={0.7} roughness={0.3} />
+      </mesh>
+      
+      {/* Exhaust pipe */}
+      <mesh position={[-0.3, 0.2, -config.bodySize[2]/2 - 0.1]} castShadow>
+        <cylinderGeometry args={[0.05, 0.05, 0.2, 8]} />
+        <meshStandardMaterial color="#4b5563" metalness={0.9} roughness={0.1} />
       </mesh>
     </group>
   );
 };
 
-// Individual 3D Parking Slot Component
+// Enhanced Parking Gate with security booth
+const ParkingGate = ({ position, type, isOpen }) => {
+  const [gateRotation, setGateRotation] = useState(0);
+  
+  useEffect(() => {
+    const targetRotation = isOpen ? -Math.PI/2 : 0;
+    const animate = () => {
+      setGateRotation(prev => {
+        const diff = targetRotation - prev;
+        if (Math.abs(diff) < 0.01) return targetRotation;
+        return prev + diff * 0.1;
+      });
+    };
+    
+    const interval = setInterval(animate, 16);
+    return () => clearInterval(interval);
+  }, [isOpen]);
+
+  return (
+    <group position={position}>
+      {/* Security booth */}
+      <mesh position={type === 'entrance' ? [-6, 1.5, 0] : [6, 1.5, 0]} castShadow receiveShadow>
+        <boxGeometry args={[2, 3, 2]} />
+        <meshStandardMaterial color="#f0f0f0" />
+      </mesh>
+      
+      {/* Booth roof */}
+      <mesh position={type === 'entrance' ? [-6, 3.2, 0] : [6, 3.2, 0]} castShadow>
+        <boxGeometry args={[2.4, 0.3, 2.4]} />
+        <meshStandardMaterial color="#8B4513" />
+      </mesh>
+      
+      {/* Booth window */}
+      <mesh position={type === 'entrance' ? [-5, 2, 0] : [5, 2, 0]} castShadow>
+        <boxGeometry args={[0.1, 1, 1.5]} />
+        <meshStandardMaterial color="#87ceeb" transparent opacity={0.7} />
+      </mesh>
+      
+      {/* Gate pillars */}
+      <mesh position={[-3, 2.5, 0]} castShadow receiveShadow>
+        <boxGeometry args={[0.4, 5, 0.4]} />
+        <meshStandardMaterial color="#6b7280" metalness={0.3} roughness={0.7} />
+      </mesh>
+      <mesh position={[3, 2.5, 0]} castShadow receiveShadow>
+        <boxGeometry args={[0.4, 5, 0.4]} />
+        <meshStandardMaterial color="#6b7280" metalness={0.3} roughness={0.7} />
+      </mesh>
+      
+      {/* Gate mechanism box */}
+      <mesh position={[-3, 4.5, 0]} castShadow>
+        <boxGeometry args={[0.6, 0.4, 0.6]} />
+        <meshStandardMaterial color="#4b5563" metalness={0.5} roughness={0.5} />
+      </mesh>
+      
+      {/* Gate arm */}
+      <group position={[-3, 4.2, 0]}>
+        <mesh rotation={[0, 0, gateRotation]} castShadow>
+          <boxGeometry args={[6, 0.15, 0.3]} />
+          <meshStandardMaterial color="#ef4444" />
+        </mesh>
+        {/* Reflective strips on gate arm */}
+        <mesh rotation={[0, 0, gateRotation]} position={[1.5, 0, 0.16]} castShadow>
+          <boxGeometry args={[1, 0.05, 0.05]} />
+          <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.3} />
+        </mesh>
+        <mesh rotation={[0, 0, gateRotation]} position={[-1.5, 0, 0.16]} castShadow>
+          <boxGeometry args={[1, 0.05, 0.05]} />
+          <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.3} />
+        </mesh>
+      </group>
+      
+      {/* Traffic light */}
+      <mesh position={[3, 4.5, 1]} castShadow>
+        <cylinderGeometry args={[0.2, 0.2, 0.8, 16]} />
+        <meshStandardMaterial color="#2d3748" />
+      </mesh>
+      <mesh position={[3, 4.7, 1]} castShadow>
+        <sphereGeometry args={[0.15, 16, 16]} />
+        <meshStandardMaterial 
+          color={isOpen ? "#22c55e" : "#ef4444"} 
+          emissive={isOpen ? "#22c55e" : "#ef4444"} 
+          emissiveIntensity={0.8} 
+        />
+      </mesh>
+      
+      {/* Gate sensors */}
+      <mesh position={[-3, 0.5, 2]} castShadow>
+        <boxGeometry args={[0.2, 0.8, 0.2]} />
+        <meshStandardMaterial color="#1f2937" />
+      </mesh>
+      <mesh position={[3, 0.5, 2]} castShadow>
+        <boxGeometry args={[0.2, 0.8, 0.2]} />
+        <meshStandardMaterial color="#1f2937" />
+      </mesh>
+      
+      {/* Sign */}
+      <Html position={type === 'entrance' ? [-4, 6, 0] : [4, 6, 0]} center>
+        <div className={`us-bk-gate-sign us-bk-gate-${type}`}>
+          {type === 'entrance' ? '🚗 ENTRANCE' : '🚗 EXIT'}
+        </div>
+      </Html>
+    </group>
+  );
+};
+
+// Security Camera Component
+const SecurityCamera = ({ position }) => {
+  const cameraRef = useRef();
+  
+  useFrame((state) => {
+    if (cameraRef.current) {
+      cameraRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.5;
+    }
+  });
+  
+  return (
+    <group position={position}>
+      {/* Camera pole */}
+      <mesh position={[0, 2, 0]} castShadow>
+        <cylinderGeometry args={[0.1, 0.1, 4, 8]} />
+        <meshStandardMaterial color="#4a5568" metalness={0.7} roughness={0.3} />
+      </mesh>
+      
+      {/* Camera housing */}
+      <mesh ref={cameraRef} position={[0, 4.2, 0]} castShadow>
+        <boxGeometry args={[0.3, 0.2, 0.4]} />
+        <meshStandardMaterial color="#1a202c" metalness={0.8} roughness={0.2} />
+      </mesh>
+      
+      {/* Camera lens */}
+      <mesh ref={cameraRef} position={[0, 4.2, 0.2]} castShadow>
+        <cylinderGeometry args={[0.08, 0.08, 0.1, 16]} />
+        <meshStandardMaterial color="#000000" metalness={0.9} roughness={0.1} />
+      </mesh>
+      
+      {/* LED indicator */}
+      <mesh ref={cameraRef} position={[0.1, 4.3, 0]} castShadow>
+        <sphereGeometry args={[0.02, 8, 8]} />
+        <meshStandardMaterial color="#ef4444" emissive="#ef4444" emissiveIntensity={1} />
+      </mesh>
+    </group>
+  );
+};
+
+// Enhanced Parking Slot with realistic details and improved animations
 const ParkingSlot = ({ 
   position, 
   index, 
@@ -60,45 +445,89 @@ const ParkingSlot = ({
   isBooked, 
   onSlotClick, 
   slotLabel,
-  hasCar 
+  orientation = 'horizontal',
+  slotType = 'regular',
+  vehicleNumber = '',
+  sectionType = 'standard'
 }) => {
   const meshRef = useRef();
   const [hovered, setHovered] = useState(false);
   const [showCar, setShowCar] = useState(false);
+  const [isArriving, setIsArriving] = useState(false);
+  const [isParked, setIsParked] = useState(false);
 
-  // Animation frame for pulsing effect on booked slots
+  // Enhanced slot dimensions based on type and orientation
+  const getSlotDimensions = () => {
+    const baseWidth = slotType === 'compact' ? 3.2 : 4.0;
+    const baseDepth = slotType === 'compact' ? 2.2 : 2.8;
+    
+    if (sectionType === 'angled') {
+      return {
+        width: orientation === 'horizontal' ? baseWidth : baseDepth,
+        depth: orientation === 'horizontal' ? baseDepth : baseWidth,
+        angle: orientation === 'horizontal' ? 0 : Math.PI / 6 // 30 degree angle
+      };
+    }
+    
+    return {
+      width: orientation === 'horizontal' ? baseWidth : baseDepth,
+      depth: orientation === 'horizontal' ? baseDepth : baseWidth,
+      angle: 0
+    };
+  };
+
+  const { width, depth, angle } = getSlotDimensions();
+
+  // Calculate proper car position and rotation based on slot orientation
+  const carPosition = [position[0], 0.2, position[2]];
+  const carRotation = [0, (orientation === 'vertical' ? Math.PI/2 : 0) + angle, 0];
+
   useFrame((state) => {
     if (meshRef.current) {
       if (isBooked) {
-        // Pulsing animation for booked slots
-        const pulse = Math.sin(state.clock.elapsedTime * 3) * 0.1 + 1;
-        meshRef.current.scale.y = pulse;
+        const pulse = Math.sin(state.clock.elapsedTime * 2) * 0.03 + 1;
+        meshRef.current.scale.setScalar(pulse);
       } else if (hovered && !isBooked) {
-        // Lift effect on hover
-        meshRef.current.position.y = position[1] + 0.2;
+        meshRef.current.position.y = position[1] + 0.12;
+        const glow = Math.sin(state.clock.elapsedTime * 4) * 0.3 + 0.7;
+        meshRef.current.material.emissiveIntensity = glow * 0.2;
       } else {
-        // Reset to normal position
         meshRef.current.position.y = position[1];
-        meshRef.current.scale.y = isSelected ? 1.1 : 1;
+        meshRef.current.scale.setScalar(isSelected ? 1.08 : 1);
+        meshRef.current.material.emissiveIntensity = isSelected ? 0.15 : 0;
       }
     }
   });
 
-  // Animate car appearing when selected
   useEffect(() => {
     if (isSelected && !isBooked) {
-      const timer = setTimeout(() => setShowCar(true), 300);
+      setIsArriving(true);
+      const timer = setTimeout(() => {
+        setShowCar(true);
+        setTimeout(() => {
+          setIsArriving(false);
+          setIsParked(true);
+        }, 3000); // Longer animation time
+      }, 800);
       return () => clearTimeout(timer);
+    } else if (isBooked) {
+      setShowCar(true);
+      setIsParked(true);
     } else {
       setShowCar(false);
+      setIsArriving(false);
+      setIsParked(false);
     }
   }, [isSelected, isBooked]);
 
   const getSlotColor = () => {
-    if (isBooked) return '#ff4444'; // Red for booked
-    if (isSelected) return '#4444ff'; // Blue for selected
-    if (hovered) return '#44ff44'; // Bright green for hover
-    return '#22aa22'; // Default green for available
+    if (slotType === 'handicap') return isBooked ? '#7c3aed' : '#a855f7';
+    if (slotType === 'compact') return isBooked ? '#dc2626' : '#10b981';
+    if (slotType === 'premium') return isBooked ? '#dc2626' : '#f59e0b';
+    if (isBooked) return '#dc2626';
+    if (isSelected) return '#3b82f6';
+    if (hovered) return '#10b981';
+    return '#22c55e';
   };
 
   const handleClick = (e) => {
@@ -109,130 +538,732 @@ const ParkingSlot = ({
   };
 
   return (
-    <group position={position}>
-      {/* Main slot box */}
+    <group position={position} rotation={[0, angle, 0]}>
+      {/* Enhanced asphalt base with texture */}
+      <mesh position={[0, -0.02, 0]} receiveShadow>
+        <boxGeometry args={[width + 0.6, 0.15, depth + 0.6]} />
+        <meshStandardMaterial 
+          color="#2d3748" 
+          roughness={0.95}
+          metalness={0.02}
+        />
+      </mesh>
+      
+      {/* Main slot marking with enhanced visual feedback */}
       <mesh
         ref={meshRef}
         onClick={handleClick}
         onPointerOver={() => !isBooked && setHovered(true)}
         onPointerOut={() => setHovered(false)}
-        castShadow
+        position={[0, 0.02, 0]}
         receiveShadow
       >
-        <boxGeometry args={[4, 0.2, 2]} />
+        <boxGeometry args={[width, 0.03, depth]} />
         <meshStandardMaterial 
           color={getSlotColor()} 
           transparent={isBooked}
           opacity={isBooked ? 0.7 : 1}
-          emissive={isBooked ? '#440000' : (hovered ? '#002200' : '#000000')}
-          emissiveIntensity={isBooked ? 0.3 : (hovered ? 0.2 : 0)}
+          emissive={getSlotColor()}
+          emissiveIntensity={isBooked ? 0.1 : (hovered ? 0.2 : (isSelected ? 0.15 : 0))}
+          roughness={0.8}
+          metalness={0.1}
         />
       </mesh>
       
-      {/* Car model for selected slot */}
-      <CarModel position={[0, 0.5, 0]} visible={showCar} />
+      {/* Car model with enhanced positioning */}
+      <CarModel 
+        position={carPosition} 
+        visible={showCar} 
+        isArriving={isArriving} 
+        isParked={isParked}
+        color={isSelected ? "#3b82f6" : (isBooked ? "#dc2626" : "#007AFF")}
+        carType={slotType === 'compact' ? 'compact' : (slotType === 'premium' ? 'suv' : 'sedan')}
+        targetPosition={carPosition}
+        targetRotation={carRotation}
+        licensePlate={isBooked ? vehicleNumber : "NEWCAR"}
+      />
       
-      {/* Slot number label */}
-      <Html position={[0, 0.5, 0]} center>
-        <div style={{
-          background: 'rgba(0,0,0,0.8)',
-          color: 'white',
-          padding: '4px 8px',
-          borderRadius: '4px',
-          fontSize: '14px',
-          fontWeight: 'bold',
-          pointerEvents: 'none',
-          userSelect: 'none'
-        }}>
+      {/* Enhanced parking lines with better visibility */}
+      {/* Front line */}
+      <mesh position={[0, 0.03, depth/2]} receiveShadow>
+        <boxGeometry args={[width + 0.3, 0.02, 0.2]} />
+        <meshStandardMaterial 
+          color="#ffffff" 
+          emissive="#ffffff" 
+          emissiveIntensity={0.2}
+          roughness={0.3}
+        />
+      </mesh>
+      {/* Back line */}
+      <mesh position={[0, 0.03, -depth/2]} receiveShadow>
+        <boxGeometry args={[width + 0.3, 0.02, 0.2]} />
+        <meshStandardMaterial 
+          color="#ffffff" 
+          emissive="#ffffff" 
+          emissiveIntensity={0.2}
+          roughness={0.3}
+        />
+      </mesh>
+      {/* Left line */}
+      <mesh position={[-width/2, 0.03, 0]} receiveShadow>
+        <boxGeometry args={[0.2, 0.02, depth + 0.3]} />
+        <meshStandardMaterial 
+          color="#ffffff" 
+          emissive="#ffffff" 
+          emissiveIntensity={0.2}
+          roughness={0.3}
+        />
+      </mesh>
+      
+
+      {/* Right line */}
+      <mesh position={[width/2, 0.03, 0]} receiveShadow>
+        <boxGeometry args={[0.2, 0.02, depth + 0.3]} />
+        <meshStandardMaterial 
+          color="#ffffff" 
+          emissive="#ffffff" 
+          emissiveIntensity={0.2}
+          roughness={0.3}
+        />
+      </mesh>
+      
+      {/* Enhanced slot type indicators */}
+      {slotType === 'handicap' && (
+        <>
+          <Html position={[0, 0.15, 0]} center>
+            <div className="us-bk-handicap-symbol">♿</div>
+          </Html>
+          {/* Blue handicap background */}
+          <mesh position={[0, 0.01, 0]} receiveShadow>
+            <boxGeometry args={[1.5, 0.01, 1.5]} />
+            <meshStandardMaterial color="#3b82f6" transparent opacity={0.3} />
+          </mesh>
+        </>
+      )}
+      
+      {slotType === 'compact' && (
+        <Html position={[0, 0.15, 0]} center>
+          <div className="us-bk-compact-symbol">🚗</div>
+        </Html>
+      )}
+      
+      {slotType === 'premium' && (
+        <>
+          <Html position={[0, 0.15, 0]} center>
+            <div className="us-bk-premium-symbol">⭐</div>
+          </Html>
+          {/* Gold premium background */}
+          <mesh position={[0, 0.01, 0]} receiveShadow>
+            <boxGeometry args={[width * 0.8, 0.01, depth * 0.8]} />
+            <meshStandardMaterial color="#f59e0b" transparent opacity={0.2} />
+          </mesh>
+        </>
+      )}
+      
+      {/* Enhanced slot number with better styling */}
+      <Html position={[0, 0.8, 0]} center>
+        <div className={`us-bk-slot-label ${slotType === 'handicap' ? 'us-bk-slot-handicap' : ''} ${slotType === 'compact' ? 'us-bk-slot-compact' : ''} ${slotType === 'premium' ? 'us-bk-slot-premium' : ''}`}>
           {slotLabel}
         </div>
       </Html>
       
-      {/* Parking lines */}
-      <mesh position={[0, 0.01, 0]}>
-        <boxGeometry args={[4.1, 0.01, 0.1]} />
-        <meshStandardMaterial color="#ffffff" />
+      {/* Vehicle number for booked slots */}
+      {isBooked && vehicleNumber && (
+        <Html position={[0, 1.4, 0]} center>
+          <div className="us-bk-vehicle-number">{vehicleNumber}</div>
+        </Html>
+      )}
+      
+      {/* Enhanced curb stops with realistic design */}
+      <mesh position={[0, 0.08, depth/2 - 0.4]} castShadow>
+        <boxGeometry args={[width * 0.9, 0.15, 0.4]} />
+        <meshStandardMaterial color="#d1d5db" roughness={0.8} />
       </mesh>
-      <mesh position={[0, 0.01, 2]} rotation={[0, 0, 0]}>
-        <boxGeometry args={[4.1, 0.01, 0.1]} />
-        <meshStandardMaterial color="#ffffff" />
-      </mesh>
-      <mesh position={[-2, 0.01, 0]} rotation={[0, 0, 0]}>
-        <boxGeometry args={[0.1, 0.01, 2.1]} />
-        <meshStandardMaterial color="#ffffff" />
-      </mesh>
-      <mesh position={[2, 0.01, 0]} rotation={[0, 0, 0]}>
-        <boxGeometry args={[0.1, 0.01, 2.1]} />
-        <meshStandardMaterial color="#ffffff" />
-      </mesh>
+      
+      {/* Slot status indicator lights */}
+      {!isBooked && (
+        <mesh position={[width/2 - 0.2, 0.1, depth/2 - 0.2]} castShadow>
+          <cylinderGeometry args={[0.05, 0.05, 0.2, 8]} />
+          <meshStandardMaterial 
+            color={isSelected ? "#3b82f6" : "#22c55e"} 
+            emissive={isSelected ? "#3b82f6" : "#22c55e"} 
+            emissiveIntensity={0.8} 
+          />
+        </mesh>
+      )}
     </group>
   );
 };
 
-// Main 3D Scene Component
+// Enhanced parking lot environment with more realistic sections
+const ParkingLotEnvironment = () => {
+  return (
+    <>
+      {/* Enhanced asphalt ground with realistic texture and wear patterns */}
+      <mesh rotation={[-Math.PI/2, 0, 0]} position={[0, -0.5, 0]} receiveShadow>
+        <planeGeometry args={[220, 220]} />
+        <meshStandardMaterial 
+          color="#374151" 
+          roughness={0.95}
+          metalness={0.02}
+        />
+      </mesh>
+      
+      {/* Main driving lanes with enhanced realism */}
+      <mesh rotation={[-Math.PI/2, 0, 0]} position={[0, -0.48, 0]} receiveShadow>
+        <planeGeometry args={[14, 220]} />
+        <meshStandardMaterial color="#4b5563" roughness={0.9} />
+      </mesh>
+      
+      {/* Secondary access roads */}
+      <mesh rotation={[-Math.PI/2, 0, 0]} position={[-35, -0.48, 0]} receiveShadow>
+        <planeGeometry args={[8, 180]} />
+        <meshStandardMaterial color="#4b5563" roughness={0.9} />
+      </mesh>
+      <mesh rotation={[-Math.PI/2, 0, 0]} position={[35, -0.48, 0]} receiveShadow>
+        <planeGeometry args={[8, 180]} />
+        <meshStandardMaterial color="#4b5563" roughness={0.9} />
+      </mesh>
+      
+      {/* Enhanced lane dividers with proper spacing */}
+      {Array.from({ length: 25 }).map((_, i) => (
+        <mesh key={i} rotation={[-Math.PI/2, 0, 0]} position={[0, -0.47, -110 + i * 9]} receiveShadow>
+          <planeGeometry args={[0.4, 5]} />
+          <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.3} />
+        </mesh>
+      ))}
+      
+      {/* Crosswalk markings with zebra pattern */}
+      {[-25, 0, 25].map(z => (
+        <group key={z}>
+          {Array.from({ length: 10 }).map((_, i) => (
+            <mesh key={i} rotation={[-Math.PI/2, 0, 0]} position={[-12 + i * 2.4, -0.47, z]} receiveShadow>
+              <planeGeometry args={[1.8, 8]} />
+              <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.15} />
+            </mesh>
+          ))}
+        </group>
+      ))}
+      
+      {/* Directional arrows with better visibility */}
+      {[-40, -20, 0, 20, 40].map((z, i) => (
+        <Html key={i} position={[0, 0.1, z]} center rotation={[-Math.PI/2, 0, 0]}>
+          <div className="us-bk-road-arrow">
+            {i % 2 === 0 ? '⬆' : '⬇'}
+          </div>
+        </Html>
+      ))}
+      
+      {/* Enhanced speed bumps with warning stripes */}
+      {[-45, -15, 15, 45].map((z, i) => (
+        <group key={i}>
+          <mesh rotation={[-Math.PI/2, 0, 0]} position={[0, -0.44, z]} castShadow>
+            <cylinderGeometry args={[0.18, 0.18, 14, 16]} />
+            <meshStandardMaterial color="#fbbf24" roughness={0.8} />
+          </mesh>
+          {/* Warning stripes */}
+          {Array.from({ length: 5 }).map((_, j) => (
+            <mesh key={j} rotation={[-Math.PI/2, 0, 0]} position={[-6 + j * 3, -0.43, z]} castShadow>
+              <cylinderGeometry args={[0.19, 0.19, 1, 8]} />
+              <meshStandardMaterial color="#000000" />
+            </mesh>
+          ))}
+        </group>
+      ))}
+      
+      {/* Enhanced lighting system with modern LED fixtures */}
+      {Array.from({ length: 12 }).map((_, i) => {
+        const x = -55 + i * 10;
+        return (
+          <group key={i}>
+            {/* Modern light pole */}
+            <mesh position={[x, 7, -65]} castShadow>
+              <cylinderGeometry args={[0.25, 0.35, 14, 16]} />
+              <meshStandardMaterial color="#6b7280" metalness={0.9} roughness={0.1} />
+            </mesh>
+            
+            {/* LED light fixture with housing */}
+            <mesh position={[x, 14, -65]} castShadow>
+              <boxGeometry args={[2, 0.8, 2]} />
+              <meshStandardMaterial color="#2d3748" metalness={0.7} roughness={0.3} />
+            </mesh>
+            
+            {/* LED panel */}
+            <mesh position={[x, 13.5, -65]} castShadow>
+              <boxGeometry args={[1.8, 0.1, 1.8]} />
+              <meshStandardMaterial 
+                color="#f1f5f9" 
+                emissive="#fbbf24" 
+                emissiveIntensity={0.8}
+                transparent
+                opacity={0.95}
+              />
+            </mesh>
+            
+            {/* Enhanced light source */}
+            <pointLight 
+              position={[x, 14, -65]} 
+              intensity={2.5} 
+              distance={30}
+              color="#fbbf24"
+              castShadow
+              shadow-mapSize-width={1024}
+              shadow-mapSize-height={1024}
+            />
+          </group>
+        );
+      })}
+      
+      {/* Enhanced security cameras with better positioning */}
+      <SecurityCamera position={[-25, 0, -50]} />
+      <SecurityCamera position={[25, 0, -50]} />
+      <SecurityCamera position={[-40, 0, -10]} />
+      <SecurityCamera position={[40, 0, -10]} />
+      <SecurityCamera position={[-25, 0, 30]} />
+      <SecurityCamera position={[25, 0, 30]} />
+      <SecurityCamera position={[0, 0, 50]} />
+      
+      {/* Modern payment kiosks with digital displays */}
+      {[-18, 18].map((x, i) => (
+        <group key={i} position={[x, 0, -55]}>
+          <mesh position={[0, 1.8, 0]} castShadow>
+            <boxGeometry args={[1, 3.6, 0.8]} />
+            <meshStandardMaterial color="#1f2937" metalness={0.8} roughness={0.2} />
+          </mesh>
+          {/* Digital screen */}
+          <mesh position={[0, 2.5, -0.35]} castShadow>
+            <boxGeometry args={[0.8, 1.2, 0.1]} />
+            <meshStandardMaterial color="#000000" emissive="#0ea5e9" emissiveIntensity={0.4} />
+          </mesh>
+          {/* Card reader */}
+          <mesh position={[0, 1.5, -0.35]} castShadow>
+            <boxGeometry args={[0.3, 0.2, 0.1]} />
+            <meshStandardMaterial color="#22c55e" emissive="#22c55e" emissiveIntensity={0.3} />
+          </mesh>
+          <Html position={[0, 4, 0]} center>
+            <div className="us-bk-kiosk-sign">💳 Smart Payment</div>
+          </Html>
+        </group>
+      ))}
+      
+      {/* Enhanced building structures */}
+      {/* Main office complex */}
+      <mesh position={[-70, 12, 0]} castShadow receiveShadow>
+        <boxGeometry args={[25, 24, 140]} />
+        <meshStandardMaterial color="#f8fafc" roughness={0.6} metalness={0.1} />
+      </mesh>
+      
+      {/* Modern glass office building */}
+      <mesh position={[70, 18, -25]} castShadow receiveShadow>
+        <boxGeometry args={[18, 36, 90]} />
+        <meshStandardMaterial color="#e2e8f0" roughness={0.4} metalness={0.3} />
+      </mesh>
+      
+      {/* Shopping center */}
+      <mesh position={[0, 8, 75]} castShadow receiveShadow>
+        <boxGeometry args={[120, 16, 20]} />
+        <meshStandardMaterial color="#f1f5f9" roughness={0.7} />
+      </mesh>
+      
+      {/* Enhanced windows with realistic patterns */}
+      {Array.from({ length: 24 }).map((_, i) => {
+        const floor = Math.floor(i / 6);
+        const window = i % 6;
+        return (
+          <mesh key={i} position={[62, 6 + floor * 6, -70 + window * 15]} castShadow>
+            <boxGeometry args={[0.3, 4, 8]} />
+            <meshStandardMaterial 
+              color="#87ceeb" 
+              transparent 
+              opacity={0.8}
+              emissive="#87ceeb"
+              emissiveIntensity={0.1}
+            />
+          </mesh>
+        );
+      })}
+      
+      {/* Landscaping with enhanced trees */}
+      {[
+        [-50, 0, -80], [50, 0, -80], [-50, 0, 80], [50, 0, 80],
+        [-90, 0, -40], [-90, 0, 0], [-90, 0, 40], 
+        [90, 0, -40], [90, 0, 0], [90, 0, 40],
+        [-25, 0, -75], [25, 0, -75], [0, 0, 85]
+      ].map((pos, i) => (
+        <group key={i} position={pos}>
+          {/* Enhanced tree trunk with texture */}
+          <mesh position={[0, 2.5, 0]} castShadow>
+            <cylinderGeometry args={[0.6, 0.9, 5, 12]} />
+            <meshStandardMaterial color="#8B4513" roughness={0.9} />
+          </mesh>
+          {/* Tree crown with multiple layers */}
+          <mesh position={[0, 7, 0]} castShadow>
+            <sphereGeometry args={[3.5, 12, 12]} />
+            <meshStandardMaterial color="#228B22" roughness={0.8} />
+          </mesh>
+          <mesh position={[0, 8.5, 0]} castShadow>
+            <sphereGeometry args={[2.8, 10, 10]} />
+            <meshStandardMaterial color="#32CD32" roughness={0.7} />
+          </mesh>
+        </group>
+      ))}
+      
+      {/* Enhanced waste management */}
+      {[
+        [-30, 0, -60], [30, 0, -60], [-45, 0, -10], [45, 0, -10],
+        [-30, 0, 40], [30, 0, 40], [0, 0, 65]
+      ].map((pos, i) => (
+        <group key={i} position={pos}>
+          <mesh position={[0, 1.2, 0]} castShadow>
+            <cylinderGeometry args={[0.45, 0.55, 2.4, 16]} />
+            <meshStandardMaterial color="#4a5568" metalness={0.6} roughness={0.6} />
+          </mesh>
+          <mesh position={[0, 2.6, 0]} castShadow>
+            <cylinderGeometry args={[0.5, 0.5, 0.15, 16]} />
+            <meshStandardMaterial color="#2d3748" metalness={0.7} roughness={0.3} />
+          </mesh>
+          {/* Recycling symbol */}
+          <Html position={[0, 1.5, 0.5]} center>
+            <div className="us-bk-recycle-symbol">♻️</div>
+          </Html>
+        </group>
+      ))}
+      
+      {/* Enhanced fire safety equipment */}
+      {[[-60, 0, -30], [60, 0, -30], [-60, 0, 30], [60, 0, 30]].map((pos, i) => (
+        <group key={i} position={pos}>
+          <mesh position={[0, 1, 0]} castShadow>
+            <cylinderGeometry args={[0.35, 0.45, 2, 16]} />
+            <meshStandardMaterial color="#dc2626" metalness={0.9} roughness={0.1} />
+          </mesh>
+          <mesh position={[0.4, 1.4, 0]} castShadow>
+            <cylinderGeometry args={[0.12, 0.12, 0.4, 8]} />
+            <meshStandardMaterial color="#dc2626" metalness={0.9} roughness={0.1} />
+          </mesh>
+          <mesh position={[-0.4, 1.4, 0]} castShadow>
+            <cylinderGeometry args={[0.12, 0.12, 0.4, 8]} />
+            <meshStandardMaterial color="#dc2626" metalness={0.9} roughness={0.1} />
+          </mesh>
+          {/* Fire department connection */}
+          <mesh position={[0, 0.3, 0]} castShadow>
+            <cylinderGeometry args={[0.5, 0.5, 0.6, 16]} />
+            <meshStandardMaterial color="#1f2937" metalness={0.8} roughness={0.2} />
+          </mesh>
+        </group>
+      ))}
+      
+      {/* Enhanced entrance and exit gates */}
+      <ParkingGate position={[0, 0, -65]} type="entrance" isOpen={true} />
+      <ParkingGate position={[0, 0, 65]} type="exit" isOpen={true} />
+      
+      {/* Emergency exits with better signage */}
+      {[[-80, 0, 0], [80, 0, 0]].map((pos, i) => (
+        <group key={i} position={pos}>
+          <mesh position={[0, 2, 0]} castShadow>
+            <boxGeometry args={[2.5, 4, 0.3]} />
+            <meshStandardMaterial color="#ef4444" emissive="#ef4444" emissiveIntensity={0.2} />
+          </mesh>
+          <mesh position={[0, 2, 0.2]} castShadow>
+            <boxGeometry args={[2.2, 3.5, 0.1]} />
+            <meshStandardMaterial color="#ffffff" />
+          </mesh>
+          <Html position={[0, 4.5, 0]} center>
+            <div className="us-bk-emergency-sign">🚨 EMERGENCY EXIT</div>
+          </Html>
+        </group>
+      ))}
+      
+      {/* Pedestrian areas with enhanced details */}
+      {Array.from({ length: 12 }).map((_, i) => {
+        const x = -55 + Math.random() * 110;
+        const z = -60 + Math.random() * 120;
+        return (
+          <group key={i} position={[x, 0, z]}>
+            <mesh position={[0, 1.8, 0]} castShadow>
+              <cylinderGeometry args={[0.18, 0.18, 1.8, 8]} />
+              <meshStandardMaterial color="#4b5563" />
+            </mesh>
+            <mesh position={[0, 2.7, 0]} castShadow>
+              <sphereGeometry args={[0.22, 8, 8]} />
+              <meshStandardMaterial color="#f0d0b0" />
+            </mesh>
+            {/* Simple clothing */}
+            <mesh position={[0, 2, 0]} castShadow>
+              <cylinderGeometry args={[0.25, 0.25, 0.8, 8]} />
+              <meshStandardMaterial color={`hsl(${Math.random() * 360}, 70%, 50%)`} />
+            </mesh>
+          </group>
+        );
+      })}
+      
+      {/* Weather protection canopies */}
+      {[[-40, 0, -35], [40, 0, -35], [-40, 0, 35], [40, 0, 35]].map((pos, i) => (
+        <group key={i} position={pos}>
+          {/* Support pillars */}
+          {[[-8, 0, -4], [8, 0, -4], [-8, 0, 4], [8, 0, 4]].map((pillarPos, j) => (
+            <mesh key={j} position={pillarPos.concat([4])} castShadow>
+              <cylinderGeometry args={[0.2, 0.2, 8, 12]} />
+              <meshStandardMaterial color="#6b7280" metalness={0.8} roughness={0.2} />
+            </mesh>
+          ))}
+          {/* Canopy roof */}
+          <mesh position={[0, 8.5, 0]} castShadow receiveShadow>
+            <boxGeometry args={[18, 0.3, 10]} />
+            <meshStandardMaterial color="#e5e7eb" metalness={0.3} roughness={0.7} />
+          </mesh>
+        </group>
+      ))}
+    </>
+  );
+};
+
+// Main 3D Scene Component with enhanced realism and better slot arrangement
 const Parking3DScene = ({ 
   slots, 
   bookedSlots, 
   onSlotChange, 
   getSlotLabel, 
-  isSlotBooked 
+  isSlotBooked,
+  vehicleNumber
 }) => {
-  const slotsPerRow = 5;
-  const slotSpacing = 5;
+  // Enhanced parking lot layout with realistic sections
+  const createParkingLayout = () => {
+    const sections = [];
+    const totalSlots = slots.length;
+    let slotIndex = 0;
+    
+    // Section 1: Left side - Regular parking (angled)
+    const leftSectionSlots = Math.floor(totalSlots * 0.35);
+    for (let row = 0; row < 4; row++) {
+      for (let col = 0; col < Math.ceil(leftSectionSlots / 4); col++) {
+        if (slotIndex >= leftSectionSlots) break;
+        
+        const x = -45 + col * 5.5;
+        const z = -30 + row * 8;
+        const slotType = col === 0 ? 'handicap' : (col % 3 === 1 ? 'compact' : 'regular');
+        
+        sections.push({
+          index: slotIndex,
+          position: [x, 0, z],
+          orientation: 'horizontal',
+          slotType,
+          sectionType: 'angled'
+        });
+        slotIndex++;
+      }
+    }
+    
+    // Section 2: Center - Premium parking (straight)
+    const centerSectionSlots = Math.floor(totalSlots * 0.25);
+    for (let row = 0; row < 3; row++) {
+      for (let col = 0; col < Math.ceil(centerSectionSlots / 3); col++) {
+        if (slotIndex >= leftSectionSlots + centerSectionSlots) break;
+        
+        const x = -15 + col * 6;
+        const z = -25 + row * 10;
+        const slotType = 'premium';
+        
+        sections.push({
+          index: slotIndex,
+          position: [x, 0, z],
+          orientation: 'horizontal',
+          slotType,
+          sectionType: 'standard'
+        });
+        slotIndex++;
+      }
+    }
+    
+    // Section 3: Right side - Mixed parking
+    const rightSectionSlots = totalSlots - slotIndex;
+    for (let row = 0; row < 4; row++) {
+      for (let col = 0; col < Math.ceil(rightSectionSlots / 4); col++) {
+        if (slotIndex >= totalSlots) break;
+        
+        const x = 25 + col * 5.5;
+        const z = -30 + row * 8;
+        const slotType = row === 0 ? 'handicap' : (col % 2 === 0 ? 'compact' : 'regular');
+        
+        sections.push({
+          index: slotIndex,
+          position: [x, 0, z],
+          orientation: 'horizontal',
+          slotType,
+          sectionType: 'standard'
+        });
+        slotIndex++;
+      }
+    }
+    
+    return sections;
+  };
+
+  const parkingLayout = createParkingLayout();
 
   return (
     <>
-      {/* Lighting */}
-      <ambientLight intensity={0.4} />
+      {/* Enhanced lighting setup for better realism */}
+      <Environment preset="city" />
+      <ambientLight intensity={0.3} />
+      
+      {/* Main directional light (sun) with enhanced shadows */}
       <directionalLight 
-        position={[10, 20, 5]} 
-        intensity={1} 
+        position={[40, 50, 30]} 
+        intensity={1.8} 
         castShadow
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
-        shadow-camera-left={-50}
-        shadow-camera-right={50}
-        shadow-camera-top={50}
-        shadow-camera-bottom={-50}
+        shadow-mapSize-width={4096}
+        shadow-mapSize-height={4096}
+        shadow-camera-left={-120}
+        shadow-camera-right={120}
+        shadow-camera-top={120}
+        shadow-camera-bottom={-120}
+        shadow-camera-near={0.1}
+        shadow-camera-far={250}
+        shadow-bias={-0.0001}
       />
-      <pointLight position={[0, 10, 0]} intensity={0.5} />
+      
+      {/* Secondary lighting for better illumination */}
+      <directionalLight position={[-30, 40, -20]} intensity={0.6} />
+      <directionalLight position={[30, 40, 20]} intensity={0.6} />
+      <pointLight position={[0, 25, 0]} intensity={1.5} distance={80} />
+      
+      {/* Fog for atmospheric effect */}
+      <fog attach="fog" args={['#f0f0f0', 80, 200]} />
+      
+      {/* Enhanced parking lot environment */}
+      <ParkingLotEnvironment />
 
-      {/* Ground */}
-      <mesh position={[0, -0.5, 0]} receiveShadow>
-        <boxGeometry args={[100, 1, 100]} />
-        <meshStandardMaterial color="#333333" />
-      </mesh>
-
-      {/* Parking slots */}
-      {slots.map((slot, index) => {
-        const row = Math.floor(index / slotsPerRow);
-        const col = index % slotsPerRow;
-        const x = (col - slotsPerRow / 2 + 0.5) * slotSpacing;
-        const z = (row - Math.ceil(slots.length / slotsPerRow) / 2 + 0.5) * slotSpacing;
+      {/* Parking slots with enhanced layout */}
+      {parkingLayout.map((slot) => {
+        if (slot.index >= slots.length) return null;
         
         return (
           <ParkingSlot
-            key={index}
-            position={[x, 0, z]}
-            index={index}
-            isSelected={slot}
-            isBooked={isSlotBooked(index)}
+            key={slot.index}
+            position={slot.position}
+            index={slot.index}
+            isSelected={slots[slot.index]}
+            isBooked={isSlotBooked(slot.index)}
             onSlotClick={onSlotChange}
-            slotLabel={getSlotLabel(index)}
+            slotLabel={getSlotLabel(slot.index)}
+            orientation={slot.orientation}
+            slotType={slot.slotType}
+            sectionType={slot.sectionType}
+            vehicleNumber={vehicleNumber}
           />
         );
       })}
 
-      {/* Camera controls */}
+      {/* Enhanced camera controls with better limits */}
       <OrbitControls
         enablePan={true}
         enableZoom={true}
         enableRotate={true}
-        minDistance={5}
-        maxDistance={50}
-        maxPolarAngle={Math.PI / 2.2}
+        minDistance={15}
+        maxDistance={100}
+        maxPolarAngle={Math.PI / 2.1}
+        minPolarAngle={Math.PI / 6}
+        autoRotate={false}
+        autoRotateSpeed={0.3}
+        enableDamping={true}
+        dampingFactor={0.08}
+        panSpeed={0.8}
+        rotateSpeed={0.5}
+        zoomSpeed={0.6}
       />
     </>
+  );
+};
+
+// Loading Component
+const LoadingSpinner = () => {
+  return (
+    <div className="us-bk-loading-container">
+      <div className="us-bk-loading-spinner">
+        <Loader2 size={40} className="us-bk-spinner-icon" />
+      </div>
+      <p className="us-bk-loading-text">Loading Ultra-Realistic Parking Center...</p>
+    </div>
+  );
+};
+
+// Error Component
+const ErrorMessage = ({ error, onRetry }) => {
+  return (
+    <div className="us-bk-error-overlay">
+      <div className="us-bk-error-card">
+        <AlertCircle size={48} className="us-bk-error-icon" />
+        <h3 className="us-bk-error-title">Oops! Something went wrong</h3>
+        <p className="us-bk-error-message">{error}</p>
+        <button className="us-bk-retry-button" onClick={onRetry}>
+          Try Again
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// Enhanced Legend Component
+const Legend = () => {
+  return (
+    <div className="us-bk-legend">
+      <h4 className="us-bk-legend-title">
+        <Info size={16} />
+        Parking Legend
+      </h4>
+      <div className="us-bk-legend-item">
+        <div className="us-bk-legend-color us-bk-legend-available"></div>
+        <span>Available slots</span>
+      </div>
+      <div className="us-bk-legend-item">
+        <div className="us-bk-legend-color us-bk-legend-selected"></div>
+        <span>Your selection</span>
+      </div>
+      <div className="us-bk-legend-item">
+        <div className="us-bk-legend-color us-bk-legend-booked"></div>
+        <span>Already booked</span>
+      </div>
+      <div className="us-bk-legend-item">
+        <div className="us-bk-legend-color us-bk-legend-handicap"></div>
+        <span>Handicap accessible</span>
+      </div>
+      <div className="us-bk-legend-item">
+        <div className="us-bk-legend-color us-bk-legend-compact"></div>
+        <span>Compact vehicles</span>
+      </div>
+    </div>
+  );
+};
+
+// Enhanced Controls Guide Component
+const ControlsGuide = () => {
+  return (
+    <div className="us-bk-controls-guide">
+      <h4 className="us-bk-controls-title">
+        <MousePointer size={16} />
+        3D Navigation
+      </h4>
+      <div className="us-bk-control-item">
+        <RotateCw size={14} />
+        <span>Drag to rotate view</span>
+      </div>
+      <div className="us-bk-control-item">
+        <ZoomIn size={14} />
+        <span>Scroll to zoom in/out</span>
+      </div>
+      <div className="us-bk-control-item">
+        <MousePointer size={14} />
+        <span>Click green slots to reserve</span>
+      </div>
+      <div className="us-bk-control-item">
+        <Car size={14} />
+        <span>Cars drive from entrance!</span>
+      </div>
+      <p className="us-bk-controls-tip">
+        <SparklesIcon size={12} />
+        Watch realistic car animations and parking center features!
+      </p>
+    </div>
   );
 };
 
@@ -247,13 +1278,17 @@ const ParkingBooking = () => {
   const [vehicleno, setVehicle] = useState('');
   const [slots, setSlots] = useState([]);
   const [bookedSlots, setBookedSlots] = useState([]);
+  const [bookedSlotDetails, setBookedSlotDetails] = useState({});
   const [totalSlots, setTotalSlots] = useState(0);
   const [pricePerHour, setPricePerHour] = useState(10);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRetrying, setIsRetrying] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
+  const fetchData = () => {
+    setIsLoading(true);
+    setError(null);
     axios.get('https://nammaspot-backend.onrender.com/getseat', { params: { city } })
       .then(result => {
         console.log('Result from backend:', result.data);
@@ -261,21 +1296,33 @@ const ParkingBooking = () => {
           setTotalSlots(result.data.seat);
           setSlots(Array(result.data.seat).fill(false));
           setBookedSlots(result.data.slots || []);
+          setBookedSlotDetails(result.data.slotDetails || {});
           setPricePerHour(result.data.price);
         } else {
           setError('Seat information is not available for this city.');
         }
         setIsLoading(false);
+        setIsRetrying(false);
       })
       .catch(err => {
         console.error('Error fetching data:', err);
         setError('Failed to load data. Please try again later.');
         setIsLoading(false);
+        setIsRetrying(false);
       });
+  };
+
+  useEffect(() => {
+    fetchData();
   }, [city]);
 
+  const handleRetry = () => {
+    setIsRetrying(true);
+    fetchData();
+  };
+
   const handleSlotChange = (index) => {
-    if (bookedSlots.includes(getSlotLabel(index))) {
+    if (isSlotBooked(index)) {
       return;
     }
     const newSlots = [...slots];
@@ -283,20 +1330,17 @@ const ParkingBooking = () => {
     setSlots(newSlots);
   };
 
-  // Calculate duration in hours (rounding up partial hours)
   const calculateDuration = () => {
     if (!entryTime || !exitTime) return 0;
     
     const startTime = new Date(`1970-01-01T${entryTime}:00`);
     const endTime = new Date(`1970-01-01T${exitTime}:00`);
     
-    // Handle case where exit time is before entry time (overnight)
     let durationInHours = (endTime - startTime) / 3600000;
     if (durationInHours < 0) {
-      durationInHours += 24; // Add 24 hours for overnight parking
+      durationInHours += 24;
     }
     
-    // Round up to the nearest hour
     return Math.ceil(durationInHours);
   };
 
@@ -311,7 +1355,16 @@ const ParkingBooking = () => {
   };
 
   const getSlotLabel = (index) => {
-    return (index + 1).toString();
+    return (index + 1).toString().padStart(3, '0');
+  };
+
+  const isSlotBooked = (index) => {
+    return bookedSlots.includes(getSlotLabel(index));
+  };
+
+  const getBookedVehicleNumber = (index) => {
+    const slotLabel = getSlotLabel(index);
+    return bookedSlotDetails[slotLabel]?.vehicleNumber || '';
   };
 
   const handleProceedToPayment = () => {
@@ -332,420 +1385,186 @@ const ParkingBooking = () => {
     });
   };
 
-  const isSlotBooked = (index) => {
-    return bookedSlots.includes(getSlotLabel(index));
-  };
-
   if (isLoading) {
-    return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        color: 'white',
-        fontSize: '20px',
-        fontFamily: 'Arial, sans-serif'
-      }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ 
-            width: '50px', 
-            height: '50px', 
-            border: '5px solid rgba(255,255,255,0.3)',
-            borderTop: '5px solid white',
-            borderRadius: '50%',
-            animation: 'spin 1s linear infinite',
-            margin: '0 auto 20px'
-          }}></div>
-          Loading 3D Parking Lot...
-        </div>
-        <style jsx>{`
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-        `}</style>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   return (
-    <div style={{ 
-      width: '100vw', 
-      height: '100vh', 
-      position: 'relative',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      fontFamily: 'Arial, sans-serif'
-    }}>
+    <div className="us-bk-container">
       {error && (
-        <div style={{
-          position: 'absolute',
-          top: '20px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          background: '#ff4444',
-          color: 'white',
-          padding: '15px 25px',
-          borderRadius: '8px',
-          zIndex: 1000,
-          boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
-          fontSize: '14px'
-        }}>
-          {error}
-        </div>
+        <ErrorMessage error={error} onRetry={handleRetry} />
       )}
 
-      {/* Side Panel with Form */}
-      <div style={{
-        position: 'absolute',
-        top: '0',
-        right: '0',
-        width: '320px',
-        height: '100vh',
-        background: 'rgba(255, 255, 255, 0.95)',
-        backdropFilter: 'blur(10px)',
-        padding: '20px',
-        boxShadow: '-5px 0 15px rgba(0,0,0,0.1)',
-        zIndex: 100,
-        overflowY: 'auto'
-      }}>
-        <h2 style={{ 
-          margin: '0 0 25px 0', 
-          color: '#333', 
-          fontSize: '24px',
-          fontWeight: '700'
-        }}>
-          🚗 Book Parking
-        </h2>
+      {/* Enhanced Side Panel */}
+      <div className="us-bk-side-panel">
+        <div className="us-bk-panel-header">
+          <div className="us-bk-header-icon-container">
+            <CarTaxiFront size={30} className="us-bk-header-icon" />
+          </div>
+          <h2 className="us-bk-panel-title">Smart Parking</h2>
+          <div className="us-bk-header-decoration"></div>
+        </div>
         
-        <div style={{ marginBottom: '20px' }}>
-          <label style={{ 
-            display: 'block', 
-            marginBottom: '8px', 
-            fontWeight: '600', 
-            color: '#555',
-            fontSize: '14px'
-          }}>
-            📍 Location:
+        <div className="us-bk-form-group">
+          <label className="us-bk-form-label">
+            <MapPin size={20} color='#007AFF'/>
+            Premium Location:
           </label>
           <input
-            style={{
-              width: '100%',
-              padding: '12px',
-              border: '2px solid #e1e5e9',
-              borderRadius: '8px',
-              fontSize: '14px',
-              background: '#f8f9fa',
-              transition: 'all 0.3s ease',
-              outline: 'none'
-            }}
+            className="us-bk-form-input"
             value={city}
             readOnly
           />
-          <span style={{ 
-            display: 'block', 
-            marginTop: '8px', 
-            color: '#667eea', 
-            fontWeight: '700',
-            fontSize: '16px'
-          }}>
-            💰 ₹{pricePerHour}/hour
+          <span className="us-bk-price-tag">
+            <DollarSign size={16} />
+            ₹{pricePerHour}/hour • Secure • 24/7 Monitored
           </span>
         </div>
 
-        <div style={{ marginBottom: '20px' }}>
-          <label style={{ 
-            display: 'block', 
-            marginBottom: '8px', 
-            fontWeight: '600', 
-            color: '#555',
-            fontSize: '14px'
-          }}>
-            🚙 Vehicle Number:
+        <div className="us-bk-form-group">
+          <label className="us-bk-form-label">
+            <Car size={20} color='#007AFF'/>
+            Vehicle Registration:
           </label>
           <input
-            style={{
-              width: '100%',
-              padding: '12px',
-              border: '2px solid #e1e5e9',
-              borderRadius: '8px',
-              fontSize: '14px',
-              transition: 'all 0.3s ease',
-              outline: 'none'
-            }}
+            className="us-bk-form-input"
             type="text"
-            placeholder="Enter vehicle number"
+            placeholder="Enter vehicle number (e.g., MH01AB1234)"
             value={vehicleno}
             onChange={(e) => setVehicle(e.target.value)}
-            onFocus={(e) => e.target.style.borderColor = '#667eea'}
-            onBlur={(e) => e.target.style.borderColor = '#e1e5e9'}
+            maxLength={10}
           />
         </div>
 
-        <div style={{ marginBottom: '20px' }}>
-          <label style={{ 
-            display: 'block', 
-            marginBottom: '8px', 
-            fontWeight: '600', 
-            color: '#555',
-            fontSize: '14px'
-          }}>
-            📅 Date:
+        <div className="us-bk-form-group">
+          <label className="us-bk-form-label">
+            <Calendar size={20} color='#007AFF'/>
+            Parking Date:
           </label>
           <input
-            style={{
-              width: '100%',
-              padding: '12px',
-              border: '2px solid #e1e5e9',
-              borderRadius: '8px',
-              fontSize: '14px',
-              transition: 'all 0.3s ease',
-              outline: 'none'
-            }}
+            className="us-bk-form-input"
             type="date"
             value={date}
+            min={new Date().toISOString().split('T')[0]}
             onChange={(e) => setDate(e.target.value)}
-            onFocus={(e) => e.target.style.borderColor = '#667eea'}
-            onBlur={(e) => e.target.style.borderColor = '#e1e5e9'}
           />
         </div>
 
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: '1fr 1fr', 
-          gap: '15px',
-          marginBottom: '20px'
-        }}>
-          <div>
-            <label style={{ 
-              display: 'block', 
-              marginBottom: '8px', 
-              fontWeight: '600', 
-              color: '#555',
-              fontSize: '14px'
-            }}>
-              🕐 Entry:
+        <div className="us-bk-time-grid">
+          <div className="us-bk-form-group">
+            <label className="us-bk-form-label">
+              <Clock size={20} color='#007AFF'/>
+              Entry Time:
             </label>
             <input
-              style={{
-                width: '100%',
-                padding: '12px',
-                border: '2px solid #e1e5e9',
-                borderRadius: '8px',
-                fontSize: '14px',
-                transition: 'all 0.3s ease',
-                outline: 'none'
-              }}
+              className="us-bk-form-input"
               type="time"
               value={entryTime}
               onChange={(e) => setEntryTime(e.target.value)}
-              onFocus={(e) => e.target.style.borderColor = '#667eea'}
-              onBlur={(e) => e.target.style.borderColor = '#e1e5e9'}
             />
           </div>
 
-          <div>
-            <label style={{ 
-              display: 'block', 
-            marginBottom: '8px', 
-            fontWeight: '600', 
-            color: '#555',
-            fontSize: '14px'
-          }}>
-            🕐 Exit:
-          </label>
-          <input
-            style={{
-              width: '100%',
-              padding: '12px',
-              border: '2px solid #e1e5e9',
-              borderRadius: '8px',
-              fontSize: '14px',
-              transition: 'all 0.3s ease',
-              outline: 'none'
-            }}
-            type="time"
-            value={exitTime}
-            onChange={(e) => setExitTime(e.target.value)}
-            onFocus={(e) => e.target.style.borderColor = '#667eea'}
-            onBlur={(e) => e.target.style.borderColor = '#e1e5e9'}
+          <div className="us-bk-form-group">
+            <label className="us-bk-form-label">
+              <Clock size={20} color='#007AFF'/>
+              Exit Time:
+            </label>
+            <input
+              className="us-bk-form-input"
+              type="time"
+              value={exitTime}
+              onChange={(e) => setExitTime(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className="us-bk-summary-card">
+          <div className="us-bk-summary-header">
+            <Shield size={16} />
+            <span>Booking Summary</span>
+          </div>
+          <div className="us-bk-summary-item">
+            <span>Selected Slots:</span>
+            <span className="us-bk-summary-value">
+              {calculateSelectedSlots()} slots
+            </span>
+          </div>
+          <div className="us-bk-summary-item">
+            <span>Duration:</span>
+            <span className="us-bk-summary-value">
+              {calculateDuration()} hours
+            </span>
+          </div>
+          <div className="us-bk-summary-item">
+            <span>Security Features:</span>
+            <span className="us-bk-summary-value">✓ CCTV • ✓ Guards</span>
+          </div>
+          <div className="us-bk-total-amount">
+            <span>Total Amount:</span>
+            <span>₹{calculateTotalAmount().toFixed(2)}</span>
+          </div>
+        </div>
+
+        <Legend />
+
+        <button
+          onClick={handleProceedToPayment}
+          disabled={calculateSelectedSlots() === 0 || !date || !entryTime || !exitTime || !vehicleno}
+          className="us-bk-book-button"
+        >
+          <span>🚗 Reserve Parking ({calculateSelectedSlots()} slots)</span>
+          <ArrowRight size={20} />
+        </button>
+        
+        <div className="us-bk-features-list">
+          <div className="us-bk-feature-item">
+            <Camera size={14} />
+            <span>24/7 Security Monitoring</span>
+          </div>
+          <div className="us-bk-feature-item">
+            <Zap size={14} />
+            <span>EV Charging Available</span>
+          </div>
+          <div className="us-bk-feature-item">
+            <Users size={14} />
+            <span>Covered Parking Options</span>
+          </div>
+        </div>
+      </div>
+
+      {/* 3D Canvas */}
+      <div className="us-bk-canvas-container">
+        <Canvas
+          camera={{ position: [40, 30, 40], fov: 60 }}
+          shadows
+          gl={{ antialias: true, alpha: false }}
+        >
+          <Parking3DScene
+            slots={slots}
+            bookedSlots={bookedSlots}
+            onSlotChange={handleSlotChange}
+            getSlotLabel={getSlotLabel}
+            isSlotBooked={isSlotBooked}
+            vehicleNumber={vehicleno}
           />
-        </div>
+        </Canvas>
       </div>
 
-      <div style={{
-        padding: '20px',
-        background: 'linear-gradient(135deg, #f8f9ff 0%, #e8f0ff 100%)',
-        borderRadius: '12px',
-        marginBottom: '25px',
-        border: '2px solid #e1e8ff'
-      }}>
-        <div style={{ 
-          marginBottom: '12px', 
-          fontSize: '14px', 
-          color: '#333',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        }}>
-          <span>🎯 Selected Slots:</span>
-          <span style={{ fontWeight: '700', fontSize: '16px' }}>
-            {calculateSelectedSlots()}
-          </span>
-        </div>
-        <div style={{ 
-          marginBottom: '12px', 
-          fontSize: '14px', 
-          color: '#333',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        }}>
-          <span>⏱️ Duration:</span>
-          <span style={{ fontWeight: '700', fontSize: '16px' }}>
-            {calculateDuration()} hours
-          </span>
-        </div>
-        <div style={{ 
-          fontSize: '18px', 
-          color: '#667eea', 
-          fontWeight: '700',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        }}>
-          <span>💳 Total Amount:</span>
-          <span>₹{calculateTotalAmount().toFixed(2)}</span>
-        </div>
+      {/* Enhanced Controls Guide */}
+      {/* <ControlsGuide /> */}
+
+      {/* Navigation Help */}
+      <div className="us-bk-navigation-help">
+        <Navigation size={16} />
+        <span>Navigate the most realistic parking center simulation</span>
       </div>
 
-      <div style={{ 
-        marginBottom: '25px', 
-        fontSize: '12px', 
-        color: '#666',
-        background: '#f8f9fa',
-        padding: '15px',
-        borderRadius: '8px'
-      }}>
-        <div style={{ fontWeight: '600', marginBottom: '10px', color: '#333' }}>
-          Legend:
-        </div>
-        <div style={{ marginBottom: '5px', display: 'flex', alignItems: 'center' }}>
-          <div style={{ 
-            width: '12px', 
-            height: '12px', 
-            background: '#22aa22', 
-            borderRadius: '2px', 
-            marginRight: '8px' 
-          }}></div>
-          Available slots
-        </div>
-        <div style={{ marginBottom: '5px', display: 'flex', alignItems: 'center' }}>
-          <div style={{ 
-            width: '12px', 
-            height: '12px', 
-            background: '#4444ff', 
-            borderRadius: '2px', 
-            marginRight: '8px' 
-          }}></div>
-          Your selection (with car)
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <div style={{ 
-            width: '12px', 
-            height: '12px', 
-            background: '#ff4444', 
-            borderRadius: '2px', 
-            marginRight: '8px' 
-          }}></div>
-          Already booked
-        </div>
-      </div>
-
-      <button
-        onClick={handleProceedToPayment}
-        disabled={calculateSelectedSlots() === 0 || !date || !entryTime || !exitTime || !vehicleno}
-        style={{
-          width: '100%',
-          padding: '15px',
-          background: calculateSelectedSlots() > 0 && date && entryTime && exitTime && vehicleno
-            ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' 
-            : '#ccc',
-          color: 'white',
-          border: 'none',
-          borderRadius: '12px',
-          fontSize: '16px',
-          fontWeight: '700',
-          cursor: calculateSelectedSlots() > 0 && date && entryTime && exitTime && vehicleno ? 'pointer' : 'not-allowed',
-          transition: 'all 0.3s ease',
-          transform: 'translateY(0)',
-          boxShadow: calculateSelectedSlots() > 0 && date && entryTime && exitTime && vehicleno
-            ? '0 4px 15px rgba(102, 126, 234, 0.3)' 
-            : 'none'
-        }}
-        onMouseOver={(e) => {
-          if (calculateSelectedSlots() > 0 && date && entryTime && exitTime && vehicleno) {
-            e.target.style.transform = 'translateY(-2px)';
-            e.target.style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.4)';
-          }
-        }}
-        onMouseOut={(e) => {
-          if (calculateSelectedSlots() > 0 && date && entryTime && exitTime && vehicleno) {
-            e.target.style.transform = 'translateY(0)';
-            e.target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.3)';
-          }
-        }}
-      >
-        🚀 Book Now ({calculateSelectedSlots()} slots)
-      </button>
-    </div>
-
-    {/* 3D Canvas */}
-    <Canvas
-      style={{ width: 'calc(100vw - 320px)', height: '100vh' }}
-      camera={{ position: [15, 15, 15], fov: 75 }}
-      shadows
-    >
-      <Parking3DScene
-        slots={slots}
-        bookedSlots={bookedSlots}
-        onSlotChange={handleSlotChange}
-        getSlotLabel={getSlotLabel}
-        isSlotBooked={isSlotBooked}
-      />
-    </Canvas>
-
-    {/* Instructions overlay */}
-    <div style={{
-      position: 'absolute',
-      bottom: '20px',
-      left: '20px',
-      background: 'rgba(0,0,0,0.85)',
-      color: 'white',
-      padding: '20px',
-      borderRadius: '12px',
-      fontSize: '14px',
-      zIndex: 100,
-      backdropFilter: 'blur(10px)',
-      border: '1px solid rgba(255,255,255,0.1)'
-    }}>
-      <div style={{ 
-        fontWeight: '700', 
-        marginBottom: '10px',
-        color: '#667eea',
-        fontSize: '16px'
-      }}>
-        🎮 3D Controls:
-      </div>
-      <div style={{ marginBottom: '5px' }}>🖱️ Click and drag to rotate view</div>
-      <div style={{ marginBottom: '5px' }}>🔍 Scroll to zoom in/out</div>
-      <div style={{ marginBottom: '5px' }}>👆 Click on green slots to select</div>
-      <div style={{ fontSize: '12px', color: '#aaa', marginTop: '10px' }}>
-        💡 Tip: Cars will appear in your selected slots!
+      {/* Live status indicator */}
+      <div className="us-bk-live-status">
+        <div className="us-bk-live-dot"></div>
+        <span>Live 3D Environment</span>
       </div>
     </div>
-  </div>
   );
 };
 

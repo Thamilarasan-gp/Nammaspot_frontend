@@ -1,8 +1,8 @@
-import React, { useEffect, useState, useContext } from 'react';
-import axios from 'axios';
-import { Html5QrcodeScanner } from 'html5-qrcode';
-import { useLanguage } from '../../../USER1/Homepage/LanguageContext';
-import './Verify.css';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { Html5QrcodeScanner } from "html5-qrcode";
+import { useLanguage } from "../../../USER1/Homepage/LanguageContext";
+import "./Verify.css";
 
 const translations = {
   en: {
@@ -25,6 +25,12 @@ const translations = {
     youAreIn: "YOU ARE IN",
     youAreOut: "YOU ARE OUT",
     loadingError: "Error loading data",
+    tokenNumber: "Token Number",
+    exitTime: "Exit Time",
+    location: "Location",
+    scanQrCode: "Scan QR Code",
+    scannedData: "Scanned Data",
+    freeSlots: "Free Slots",
   },
   ta: {
     verify: "சரிபார்க்கவும்",
@@ -46,6 +52,12 @@ const translations = {
     youAreIn: "நீங்கள் உள்ளே உள்ளீர்கள்",
     youAreOut: "நீங்கள் வெளியே உள்ளீர்கள்",
     loadingError: "தரவுகளை ஏற்றுவதில் பிழை",
+    tokenNumber: "டோக்கன் எண்",
+    exitTime: "வெளியேறும் நேரம்",
+    location: "இடம்",
+    scanQrCode: "QR குறியீட்டை ஸ்கேன் செய்யவும்",
+    scannedData: "ஸ்கேன் செய்யப்பட்ட தரவு",
+    freeSlots: "இலவச இடங்கள்",
   },
   hi: {
     verify: "सत्यापित करें",
@@ -67,23 +79,30 @@ const translations = {
     youAreIn: "आप अंदर हैं",
     youAreOut: "आप बाहर हैं",
     loadingError: "डेटा लोड करने में त्रुटि",
+    tokenNumber: "टोकन संख्या",
+    exitTime: "बाहर निकलने का समय",
+    location: "स्थान",
+    scanQrCode: "QR कोड स्कैन करें",
+    scannedData: "स्कैन किया गया डेटा",
+    freeSlots: "मुफ्त स्लॉट",
   },
 };
 
 const Verify = () => {
   const { language } = useLanguage();
   const [data, setData] = useState([]);
-  const [pin, setPin] = useState('');
-  const [message, setMessage] = useState('');
-  const [seatsToFree, setSeatsToFree] = useState('');
+  const [pin, setPin] = useState("");
+  const [message, setMessage] = useState("");
+  const [seatsToFree, setSeatsToFree] = useState("");
   const [matchedDoc, setMatchedDoc] = useState(null);
   const [latestNumber, setLatestNumber] = useState();
-  const [otp, setOTP] = useState('');
+  const [otp, setOTP] = useState("");
   const [otpSent, setOTPSent] = useState(false);
   const [otpVerified, setOTPVerified] = useState(false);
-  const [email , setEmail] = useState("");
-  const [noti, setNoti] = useState('');
-  
+  const [email, setEmail] = useState("");
+  const [noti, setNoti] = useState("");
+  const [scannedData, setScannedData] = useState(null);
+
   const {
     verify,
     enterPin,
@@ -104,25 +123,48 @@ const Verify = () => {
     youAreIn,
     youAreOut,
     loadingError,
+    tokenNumber,
+    exitTime,
+    location,
+    scanQrCode,
+    scannedData: scannedDataText,
+    freeSlots,
   } = translations[language] || translations.en;
 
   useEffect(() => {
-    axios.get('https://nammaspot-backend.onrender.com/getpins')
-      .then(result => setData(result.data))
-      .catch(err => console.error(loadingError, err));
+    axios
+      .get("https://nammaspot-backend.onrender.com/getpins")
+      .then((result) => setData(result.data))
+      .catch((err) => console.error(loadingError, err));
 
-    axios.get('https://nammaspot-backend.onrender.com/getnumber')
-      .then(result => setLatestNumber(result.data.number))
-      //.then(result => console.log(result.data.number))
-      .catch(err => console.error(err));
+    axios
+      .get("https://nammaspot-backend.onrender.com/getnumber")
+      .then((result) => setLatestNumber(result.data.number))
+      .catch((err) => console.error(err));
 
-    axios.get('https://nammaspot-backend.onrender.com/getname')
-      .then(result => setEmail(result.data.email))
-      .catch(err => console.log(err));
+    axios
+      .get("https://nammaspot-backend.onrender.com/getname")
+      .then((result) => setEmail(result.data.email))
+      .catch((err) => console.log(err));
   }, [loadingError]);
 
   const handleVerify = () => {
-    const pinData = data.find(item => item.pin === parseInt(pin));
+    // First check if we have scanned data from QR code
+    if (scannedData) {
+      const pinData = data.find(
+        (item) => item.pin === parseInt(scannedData.token)
+      );
+      if (pinData) {
+        setMessage(successMatch);
+        setMatchedDoc(pinData);
+        console.log(pinData)
+        setPin(scannedData.token);
+        return;
+      }
+    }
+
+    // Fall back to manual PIN entry
+    const pinData = data.find((item) => item.pin === parseInt(pin));
     if (pinData) {
       setMessage(successMatch);
       setMatchedDoc(pinData);
@@ -133,14 +175,16 @@ const Verify = () => {
   };
 
   const handleOut = () => {
-    const pinData = data.find(item => item.pin === parseInt(pin));
+    const pinToUse = scannedData ? scannedData.token : pin;
+    const pinData = data.find((item) => item.pin === parseInt(pinToUse));
     if (pinData) {
-      axios.post('https://nammaspot-backend.onrender.com/freeupslots', {
-        pin: parseInt(pin),
-        seatsToFree: seatsToFree.split(',').map(seat => seat.trim())
-      })
+      axios
+        .post("https://nammaspot-backend.onrender.com/freeupslots", {
+          pin: parseInt(pinToUse),
+          seatsToFree: seatsToFree.split(",").map((seat) => seat.trim()),
+        })
         .then(() => setMessage(slotsFreed))
-        .catch(err => console.error(err));
+        .catch((err) => console.error(err));
     } else {
       setMessage(pinNotFound);
     }
@@ -149,10 +193,12 @@ const Verify = () => {
   const handleIn = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('https://nammaspot-backend.onrender.com/putnoti', { noti: youAreIn });
+      await axios.post("https://nammaspot-backend.onrender.com/putnoti", {
+        noti: youAreIn,
+      });
       sendNotification(youAreIn);
     } catch (error) {
-      console.error('Error sending notification:', error);
+      console.error("Error sending notification:", error);
     }
   };
 
@@ -162,95 +208,132 @@ const Verify = () => {
         await requestOTP();
         setOTPSent(true);
       } catch (error) {
-        console.error('Error requesting OTP:', error);
+        console.error("Error requesting OTP:", error);
       }
     } else {
       setNoti(youAreOut);
       try {
-        await axios.post('https://nammaspot-backend.onrender.com/putnoti', { noti: youAreOut });
+        await axios.post("https://nammaspot-backend.onrender.com/putnoti", {
+          noti: youAreOut,
+        });
         sendNotification(youAreOut);
         handleOut();
       } catch (error) {
-        console.error('Error sending notification:', error);
+        console.error("Error sending notification:", error);
       }
     }
   };
 
   const handleVerifyOTP = async () => {
     try {
-      const response = await fetch('https://nammaspot-backend.onrender.com/verifyOTPnew', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email, otp })
-      });
+      const response = await fetch(
+        "https://nammaspot-backend.onrender.com/verifyOTPnew",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, otp }),
+        }
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to verify OTP');
+        throw new Error("Failed to verify OTP");
       }
 
       const data = await response.json();
-      if (data.message === 'OTP Verified Successfully') {
+      if (data.message === "OTP Verified Successfully") {
         setOTPVerified(true);
         setNoti(youAreOut);
         try {
-          await axios.post('https://nammaspot-backend.onrender.com/putnoti', { noti: youAreOut });
+          await axios.post("https://nammaspot-backend.onrender.com/putnoti", {
+            noti: youAreOut,
+          });
           sendNotification(youAreOut);
           handleOut();
         } catch (error) {
-          console.error('Error sending notification:', error);
+          console.error("Error sending notification:", error);
         }
       } else {
-        console.log('Invalid OTP');
+        console.log("Invalid OTP");
       }
     } catch (error) {
-      console.error('Error verifying OTP:', error);
+      console.error("Error verifying OTP:", error);
     }
   };
 
   const requestOTP = async () => {
     try {
-      const response = await fetch('https://nammaspot-backend.onrender.com/reqOTP', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email })
-      });
+      const response = await fetch(
+        "https://nammaspot-backend.onrender.com/reqOTP",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email }),
+        }
+      );
 
       const data = await response.json();
       setMessage(data.message);
-      if (data.message === 'OTP Sent Successfully') {
+      if (data.message === "OTP Sent Successfully") {
         setOTPSent(true);
       }
     } catch (error) {
-      console.error('Error requesting OTP:', error);
-      setMessage('Failed to request OTP. Please try again later.');
+      console.error("Error requesting OTP:", error);
+      setMessage("Failed to request OTP. Please try again later.");
     }
   };
 
   const sendNotification = (notificationMessage) => {
-    axios.post('https://nammaspot-backend.onrender.com/sendNotification', {
-      number: latestNumber,
-      message: notificationMessage
-    })
-      .then(response => {
-        console.log('Notification sent:', response.data);
+    axios
+      .post("https://nammaspot-backend.onrender.com/sendNotification", {
+        number: latestNumber,
+        message: notificationMessage,
       })
-      .catch(err => console.error('Error sending notification:', err));
+      .then((response) => {
+        console.log("Notification sent:", response.data);
+      })
+      .catch((err) => console.error("Error sending notification:", err));
   };
 
   useEffect(() => {
     const scanner = new Html5QrcodeScanner(
-      "reader",
+      "ad-vf-reader",
       { fps: 10, qrbox: { width: 250, height: 250 } },
       false
     );
 
     const handleScanSuccess = (decodedText) => {
-      setPin(decodedText);
-      handleVerify();
+      try {
+        // Parse the QR code data
+        const parsedData = JSON.parse(decodedText);
+        setScannedData(parsedData);
+        setPin(parsedData.token);
+
+        // Find matching document
+        const pinData = data.find(
+          (item) => item.pin === parseInt(parsedData.token)
+        );
+        if (pinData) {
+          console.log(parsedData.token)
+          console.log(pinData)  
+          setMessage(successMatch);
+          setMatchedDoc(pinData);
+        } else {
+          setMessage(noMatch);
+          setMatchedDoc(null);
+        }
+
+        // Stop scanning after successful scan
+        scanner
+          .clear()
+          .catch((error) => console.error("Failed to clear scanner", error));
+      } catch (error) {
+        console.error("Error parsing QR code data:", error);
+        setMessage("Invalid QR code format");
+      }
     };
 
     const handleScanFailure = (error) => {
@@ -260,56 +343,136 @@ const Verify = () => {
     scanner.render(handleScanSuccess, handleScanFailure);
 
     return () => {
-      scanner.clear().catch(error => console.error("Failed to clear scanner", error));
+      scanner
+        .clear()
+        .catch((error) => console.error("Failed to clear scanner", error));
     };
-  }, []);
+  }, [data, successMatch]);
 
   return (
-    <div className="verify-app">
-      <div className="body18">
-        <h1>{verify}</h1>
-        <div className="verify-container">
-          <input
-            type="text"
-            value={pin}
-            onChange={(e) => setPin(e.target.value)}
-            placeholder={enterPin}
-          />
-          <button className="verify-button" onClick={handleVerify}>{verifyButton}</button>
-          <h2 className="verify-message">{message}</h2>
-          {otpSent && !otpVerified && (
-            <div>
+    <div className="ad-vf-app">
+      <div className="ad-vf-body">
+        <h1 className="ad-vf-title">{verify}</h1>
+
+        <div className="ad-vf-container">
+          <div className="ad-vf-scanner-section">
+            <h3 className="ad-vf-section-title">{scanQrCode}</h3>
+            <div id="ad-vf-reader" className="ad-vf-reader"></div>
+          </div>
+
+          <div className="ad-vf-input-section">
+            <h3 className="ad-vf-section-title">{enterPin}</h3>
+            <div className="ad-vf-input-group">
               <input
                 type="text"
-                value={otp}
-                onChange={(e) => setOTP(e.target.value)}
-                placeholder="Enter OTP"
+                value={pin}
+                onChange={(e) => setPin(e.target.value)}
+                placeholder={enterPin}
+                className="ad-vf-input"
               />
-              <button onClick={handleVerifyOTP}>Verify OTP</button>
+              <button
+                className="ad-vf-button ad-vf-primary"
+                onClick={handleVerify}
+              >
+                {verifyButton}
+              </button>
             </div>
-          )}
-          <input
-            type="text"
-            value={seatsToFree}
-            onChange={(e) => setSeatsToFree(e.target.value)}
-            placeholder={enterSeats}
-          />
-          <div className="verify-buttons">
-            <button className="verify-in" onClick={handleIn}>{inButton}</button>
-            <button className="verify-out" onClick={handleOutButton}>{out}</button>
+
+            <div className="ad-vf-input-group">
+              <input
+                type="text"
+                value={seatsToFree}
+                onChange={(e) => setSeatsToFree(e.target.value)}
+                placeholder={enterSeats}
+                className="ad-vf-input"
+              />
+              <span className="ad-vf-input-note">{freeSlots}</span>
+            </div>
+
+            {otpSent && !otpVerified && (
+              <div className="ad-vf-otp-section">
+                <input
+                  type="text"
+                  value={otp}
+                  onChange={(e) => setOTP(e.target.value)}
+                  placeholder="Enter OTP"
+                  className="ad-vf-input"
+                />
+                <button
+                  className="ad-vf-button ad-vf-secondary"
+                  onClick={handleVerifyOTP}
+                >
+                  Verify OTP
+                </button>
+              </div>
+            )}
+
+            <div className="ad-vf-action-buttons">
+              <button className="ad-vf-button ad-vf-in" onClick={handleIn}>
+                {inButton}
+              </button>
+              <button
+                className="ad-vf-button ad-vf-out"
+                onClick={handleOutButton}
+              >
+                {out}
+              </button>
+            </div>
+
+            {message && <div className="ad-vf-message">{message}</div>}
           </div>
         </div>
+
         {matchedDoc && (
-          <div className="verify-details">
-            <h3>{userDetails}</h3>
-            <p>{slotNumbers}: <span className='datas'>{matchedDoc.slotNumbers.join(', ')}</span></p>
-            <p>{date}: <span className='datas'>{matchedDoc.date}</span></p>
-            <p>{vehicleNumber}: <span className='datas'>{matchedDoc.vehicleno}</span></p>
-            <p>{totalAmount}: <span className='datas'>{matchedDoc.totalAmount}</span></p>
-            <p>{city}: <span className='datas'>{matchedDoc.city}</span></p>
+          <div className="ad-vf-details">
+            <h3 className="ad-vf-section-title">{userDetails}</h3>
+            <div className="ad-vf-detail-grid">
+              <div className="ad-vf-detail-item">
+                <span className="ad-vf-detail-label">{tokenNumber}</span>
+                <span className="ad-vf-detail-value">{matchedDoc.pin}</span>
+              </div>
+              <div className="ad-vf-detail-item">
+                <span className="ad-vf-detail-label">{slotNumbers}</span>
+                <span className="ad-vf-detail-value">
+                  {matchedDoc.slotNumbers.join(", ")}
+                </span>
+              </div>
+              <div className="ad-vf-detail-item">
+                <span className="ad-vf-detail-label">{date}</span>
+                <span className="ad-vf-detail-value">{matchedDoc.date}</span>
+              </div>
+              <div className="ad-vf-detail-item">
+                <span className="ad-vf-detail-label">{vehicleNumber}</span>
+                <span className="ad-vf-detail-value">
+                  {matchedDoc.vehicleno}
+                </span>
+              </div>
+              <div className="ad-vf-detail-item">
+                <span className="ad-vf-detail-label">{exitTime}</span>
+                <span className="ad-vf-detail-value">
+                  {matchedDoc.entryTime}
+                </span>
+              </div>
+              <div className="ad-vf-detail-item">
+                <span className="ad-vf-detail-label">{exitTime}</span>
+                <span className="ad-vf-detail-value">
+                  {matchedDoc.exitTime}
+                </span>
+              </div>
+
+              <div className="ad-vf-detail-item">
+                <span className="ad-vf-detail-label">{totalAmount}</span>
+                <span className="ad-vf-detail-value">
+                  {matchedDoc.totalAmount}
+                </span>
+              </div>
+              <div className="ad-vf-detail-item">
+                <span className="ad-vf-detail-label">{city}</span>
+                <span className="ad-vf-detail-value">{matchedDoc.city}</span>
+              </div>
+            </div>
           </div>
         )}
-        <div id="reader"></div>
       </div>
     </div>
   );

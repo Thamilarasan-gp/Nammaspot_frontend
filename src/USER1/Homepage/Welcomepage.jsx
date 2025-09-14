@@ -51,6 +51,7 @@ const Welcomepage = () => {
                                 className="form-control"
                                 placeholder={placeholder}
                                 onChange={(e) => setSearch(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && handleNavigate()}
                             />
                             <button className="btn-signin" onClick={handleNavigate}>{buttonText}</button>
                         </div>

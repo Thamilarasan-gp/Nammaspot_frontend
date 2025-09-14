@@ -22,6 +22,7 @@ body {
 .navbar.opaque {
     background-color: #ffffff;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    color: #007AFF;
 }
 
 .logo p {
@@ -37,7 +38,7 @@ body {
 
 .nav-links a {
     text-decoration: none;
-    color: #333333;
+    color: #007AFF;
     font-weight: 500;
     
 }
@@ -77,24 +78,24 @@ body {
 
 .sidebar {
     position: fixed;
-    top: 60px;
-    right: -350px;
-    height:500px;
+    top: 70px;
+    right: -300px;
+    height: fit-content;
     width: 300px;
-    background-color: #2e1b1b;
+    background-color: #fff;
     opacity: 0.8;
-    padding-top: 60px;
+    padding: 60px 10px;
     transition: 0.5s;
     z-index: 10000000;
-    border-radius: 10px;
+    border-radius: 5px;
 }
 
 .sidebar.open {
-    right: 0;
+    right: 5px;
 }
 
-.sidebar h3 {
-    color: #fff;
+.user-Welcome {
+    color: #007AFF;
     text-align: center;
 }
 
@@ -112,7 +113,7 @@ body {
 }
 
 .sidebar ul li a {
-    color: #fff;
+    color: black;
     text-decoration: none;
     display: block;
     width: 230px;
@@ -121,8 +122,8 @@ body {
 }
 
 .sidebar ul li a:hover {
-    background-color: #edeaea;
-    color: #142b42;
+    background-color: #1e89fa;
+    color: #fff;
     background-size: 50px;
     border-radius: 20px;
     transition: transform 0.6s ease;
@@ -133,25 +134,6 @@ body {
     color: #000;
 margin-left: 100px;
 margin-top: 30px;
-}
-.user-Wel{
-    font-size: larger;
-    text-align: center;
-    margin-top: -60px;
-    margin-bottom: 20px;
-    color: aliceblue;
-}
-.user-Welcome {
-    color: #edeaea;
-    margin-top: -30px;
-    margin-left: 90px;
-}
-
-.user-Welcome svg{
-    color: #edeaea;
-   height: 30px;
-   width: 30px;
-   padding-left: 6px;
 }
 
 @media screen and (max-width: 768px) {

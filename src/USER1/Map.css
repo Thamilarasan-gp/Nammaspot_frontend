@@ -1,0 +1,517 @@
+/* Map Container */
+.us-lo-container {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  position: relative;
+  margin-top: 80px;
+  background-color: #fff;
+}
+
+.us-lo-map {
+  flex: 1;
+  height: 100%;
+  width: 100%;
+}
+
+.us-lo-search-container {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  z-index: 1000;
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.us-lo-search-form {
+  display: flex;
+  margin-right: 10px;
+}
+
+.us-lo-search-input {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-right: 5px;
+  width: 250px;
+}
+
+.us-lo-search-btn {
+  background-color: #007AFF;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.us-lo-search-btn:hover {
+  background-color: #0056CC;
+}
+
+.us-lo-filter-btn {
+  background-color: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s;
+}
+
+.us-lo-filter-btn:hover {
+  background-color: #e9ecef;
+}
+
+.us-lo-filter-container {
+  position: absolute;
+  top: 80px;
+  right: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  width: 300px;
+}
+
+.us-lo-filter-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.us-lo-filter-title {
+  margin: 0;
+  color: #333;
+  font-weight: 600;
+}
+
+.us-lo-filter-input {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  width: 100%;
+}
+
+.us-lo-apply-btn {
+  background-color: #007AFF;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.us-lo-apply-btn:hover {
+  background-color: #0056CC;
+}
+
+.us-lo-details-panel {
+  width: 28%;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  position: sticky;
+  top: 10px;
+  height: auto;
+}
+
+.us-lo-info-card {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.us-lo-park-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #333;
+  text-align: center;
+  margin: 0 0 15px 0;
+}
+
+.us-lo-route-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  cursor: pointer;
+  color: #007AFF;
+}
+
+.us-lo-info-place,
+.us-lo-info-company,
+.us-lo-info-city {
+  margin: 0;
+  color: #666;
+  font-size: 1rem;
+}
+
+.us-lo-info-seats {
+  margin: 0;
+  color: #333;
+  font-size: 1.2rem;
+}
+
+.us-lo-info-price {
+  color: #007AFF;
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 10px 0;
+}
+
+.us-lo-rating {
+  background-color: #f8f9fa;
+  padding: 10px;
+  border-radius: 4px;
+  color: #333;
+  font-weight: 600;
+}
+
+.us-lo-book-btn {
+  background-color: #007AFF;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s;
+  margin: 10px 0;
+}
+
+.us-lo-book-btn:hover {
+  background-color: #0056CC;
+}
+
+.us-lo-description {
+  margin-top: 20px;
+}
+
+.us-lo-how-to-park {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.us-lo-review-section {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.us-lo-review-btn {
+  background-color: transparent;
+  color: #007AFF;
+  border: 1px solid #007AFF;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-top: 10px;
+}
+
+.us-lo-review-btn:hover {
+  background-color: #007AFF;
+  color: white;
+}
+
+.us-lo-reviews {
+  margin-top: 20px;
+}
+
+.us-lo-review-item {
+  padding: 15px;
+  border: 1px solid #eee;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+.us-lo-marquee {
+  background-color: #007AFF;
+  padding: 12px 0;
+  margin-top: 80px;
+}
+
+.us-lo-marquee-text {
+  animation: us-lo-marquee 10s linear infinite;
+  white-space: nowrap;
+  color: #fff;
+  font-weight: 500;
+}
+
+@keyframes us-lo-marquee {
+  0% {
+    transform: translateX(70%);
+  }
+  100% {
+    transform: translateX(-70%);
+  }
+}
+
+@media (max-width: 768px) {
+  .us-lo-container {
+    flex-direction: column;
+    margin-top: 20px;
+  }
+  
+  .us-lo-map {
+    height: 500px;
+  }
+  
+  .us-lo-details-panel {
+    width: 100%;
+    height: auto;
+    margin-top: 10px;
+  }
+  
+  .us-lo-search-container {
+    top: 10px;
+    right: 10px;
+    flex-direction: column;
+    width: calc(100% - 40px);
+  }
+  
+  .us-lo-search-form {
+    width: 100%;
+    margin-right: 0;
+    margin-bottom: 10px;
+  }
+  
+  .us-lo-search-input {
+    width: 100%;
+  }
+  
+  .us-lo-filter-container {
+    top: 120px;
+    right: 10px;
+    width: calc(100% - 40px);
+  }
+}
+.us-lo-details-panel {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  color: #333;
+}
+
+.us-lo-info-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.15);
+  padding: 20px;
+  max-width: 400px;
+}
+
+.us-lo-title-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.us-lo-park-title {
+  font-weight: 700;
+  font-size: 18px;
+  color: #007AFF;
+  margin: 0;
+}
+
+.us-lo-route-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  margin-right: 30px;
+  font-size: 14px;
+  color: #007AFF;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background-color: rgba(0, 122, 255, 0.1);
+}
+
+.us-lo-route-btn:hover {
+  background-color: rgba(0, 122, 255, 0.2);
+}
+
+.us-lo-info-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.us-lo-info-item {
+  display: flex;
+  align-items: start;
+  gap: 12px;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.us-lo-info-label {
+  display: block;
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.us-lo-info-value {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.us-lo-price-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: rgba(0, 122, 255, 0.05);
+  border-radius: 8px;
+}
+
+.us-lo-price-tag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.us-lo-price-label {
+  display: block;
+  font-size: 20px;
+  font-weight: 600;
+  color: rgb(0, 200, 60);
+  margin-bottom: 4px;
+}
+
+.us-lo-price-value {
+  display: block;
+  font-size: 24px;
+  font-weight: 700;
+  color: #007AFF;
+}
+
+.us-lo-rating {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.us-lo-stars {
+  display: flex;
+  gap: 2px;
+}
+
+.us-lo-book-btn {
+  width: 100%;
+  padding: 14px;
+  background-color: #007AFF;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.2s ease;
+  margin-bottom: 20px;
+}
+
+.us-lo-book-btn:hover {
+  background-color: #0056cc;
+}
+.us-lo-section-title{
+  display: flex;
+  align-items: center;
+}
+.us-lo-description, .us-lo-review-section, .us-lo-reviews {
+
+  padding-bottom: 15px;
+}
+
+.us-lo-section-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.us-lo-section-header h3 {
+  font-size: 16px;
+  margin: 0;
+  color: #007AFF;
+}
+
+.us-lo-description p, .us-lo-review-section p {
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0 0 12px 0;
+  color: #555;
+}
+
+.us-lo-review-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background-color: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.us-lo-review-btn:hover {
+  background-color: #e9ecef;
+}
+
+.us-lo-review-item {
+  padding: 12px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.us-lo-review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.us-lo-review-header h4 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.us-lo-review-stars {
+  display: flex;
+  gap: 2px;
+}
+
+.us-lo-review-item p {
+  margin: 0;
+  font-size: 14px;
+  color: #555;
+}

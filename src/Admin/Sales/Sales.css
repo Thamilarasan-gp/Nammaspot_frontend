@@ -1,125 +1,238 @@
-.body12 {
-    font-family: 'Arial', sans-serif;
-    background-color: #f4f4f4;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin-top: 50px;
-    position: absolute;
-    top: 20px;
-    
+/* Sales.css */
+.ad-sl-body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  background-color: #f5f7fa;
+  min-height: 100vh;
+  padding: 20px;
+  color: #333;
 }
 
-
-.container12{
-
-    margin-left: 10px;
-    margin-bottom: 250px;
-}
-.container {
-    
-    width: 95%;
-padding: 50px;
-    max-width: 1100px;
-    background-color: white;
-    padding: 20px;
-    border-radius: 15px;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-    width: 2000px;
-
+.ad-sl-container {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
 }
 
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    position: relative;
+.ad-sl-header {
+  padding: 24px;
+  border-bottom: 1px solid #eef0f5;
 }
 
-.header h1 {
-    font-size: 24px;
-    color: #333;
+.ad-sl-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
 }
 
-.top-right {
-    display: flex;
-    align-items: center;
+.ad-sl-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
 }
 
-select {
-    padding: 5px 10px;
-    border-radius: 10px;
-    border: 1px solid #ddd;
-    margin-right: 10px;
+.ad-sl-actions {
+  display: flex;
+  gap: 12px;
 }
 
-.today {
-    font-size: 18px;
-    color: #888;
-    margin-bottom: 10px;
+.ad-sl-download-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #007AFF;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
 }
 
-.table-container {
-    max-height: 400px; /* Set the desired max height */
-    overflow-y: auto; /* Enable vertical scrolling */
+.ad-sl-download-btn:hover {
+  background: #0056cc;
 }
 
-.sales-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
+.ad-sl-header-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
 }
 
-.sales-table th,
-.sales-table td {
-    padding: 15px;
-    text-align: left;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+.ad-sl-search {
+  position: relative;
+  flex: 1;
+  max-width: 400px;
 }
 
-.sales-table th {
-    background-color: #1b76d1;
-    color: white;
-    text-align: center;
-    font-size: 18px;
+.ad-sl-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #8c8c8c;
 }
 
-.sales-table td {
-    background-color: #f9f9f9;
-    font-size: 16px;
-    color: #333;
+.ad-sl-search-input {
+  width: 100%;
+  padding: 12px 12px 12px 40px;
+  border: 1px solid #e1e5eb;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.2s;
 }
 
-.sales-table tbody tr:hover {
-    background-color: #e9f5e9;
+.ad-sl-search-input:focus {
+  outline: none;
+  border-color: #007AFF;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
 }
 
-.status.in-order {
-    color: red;
-    font-weight: bold;
+.ad-sl-filter {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #5a5a5a;
 }
 
-.status.ordered {
-    color: green;
-    font-weight: bold;
+.ad-sl-month-select {
+  appearance: none;
+  padding: 10px 36px 10px 12px;
+  border: 1px solid #e1e5eb;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+  cursor: pointer;
+  min-width: 150px;
 }
 
-@media (max-width: 600px) {
-    .header, .top-right {
-        flex-direction: column;
-    }
+.ad-sl-select-arrow {
+  position: absolute;
+  right: 12px;
+  pointer-events: none;
+}
 
-    .top-right {
-        margin-top: 10px;
-    }
+.ad-sl-content {
+  padding: 0 24px 24px;
+}
 
-    .sales-table th, .sales-table td {
-        font-size: 14px;
-        padding: 10px;
-    }
+.ad-sl-today-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 20px 0;
+  color: #5a5a5a;
+  font-size: 15px;
+}
+
+.ad-sl-today-text {
+  font-weight: 500;
+}
+
+.ad-sl-results {
+  margin-left: auto;
+  font-size: 14px;
+  color: #8c8c8c;
+}
+
+.ad-sl-table-container {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid #eef0f5;
+}
+
+.ad-sl-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 800px;
+}
+
+.ad-sl-th {
+  background: #f8f9fc;
+  padding: 16px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 14px;
+  color: #5a5a5a;
+  border-bottom: 1px solid #eef0f5;
+}
+
+.ad-sl-th-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ad-sl-tr {
+  border-bottom: 1px solid #f0f2f5;
+  transition: background 0.2s;
+}
+
+.ad-sl-tr:hover {
+  background: #f9fbfd;
+}
+
+.ad-sl-td {
+  padding: 16px;
+  font-size: 14px;
+  color: #333;
+}
+
+.ad-sl-td-name {
+  font-weight: 500;
+}
+
+.ad-sl-td-price {
+  font-weight: 600;
+  color: #007AFF;
+}
+
+.ad-sl-td-vehicle {
+  font-family: monospace;
+  font-size: 13px;
+}
+
+.ad-sl-slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.ad-sl-empty {
+  text-align: center;
+}
+
+.ad-sl-no-data {
+  padding: 40px;
+  color: #8c8c8c;
+  font-style: italic;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .ad-sl-body {
+    padding: 12px;
+  }
+  
+  .ad-sl-header {
+    padding: 16px;
+  }
+  
+  .ad-sl-header-bottom {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .ad-sl-search {
+    max-width: 100%;
+  }
+  
+  .ad-sl-content {
+    padding: 0 16px 16px;
+  }
 }

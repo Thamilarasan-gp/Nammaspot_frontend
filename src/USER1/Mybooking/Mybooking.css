@@ -1,78 +1,273 @@
-.mb-navbar {
-  background-color: #82a8ce;
-  padding: 10px;
-  position: fixed;
-  top: 0;
-  width: 100%;
-  z-index: 1000;
-  display: flex;
-  justify-content: center; /* Center the tabs within the navbar */
-}
-
-.tabs {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.tabs button {
-  padding: 10px 20px;
-  border: none;
-  background-color: #f0f0f0;
-  cursor: pointer;
-  flex: 1;
-  text-align: center;
-  transition: background-color 0.3s ease;
-}
-
-.tabs button.active {
-  background-color: #0056b3;
-  color: white;
-}
-
-/* Userpage styling */
-.userpage {
-  max-width: 800px;
-  margin: 0 auto; /* Center align userpage */
+/* Mybooking.css */
+.mb-body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #fff;
+  color: #333;
+  min-height: 100vh;
   padding: 20px;
 }
 
-/* Booking item styling */
-.booking-item {
-  background-color: #fff;
-  padding: 15px;
+.mb-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.mb-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.mb-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #007AFF;
   margin-bottom: 10px;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.mb-subtitle {
+  font-size: 1rem;
+  color: #7f8c8d;
+  margin: 0;
+}
+
+.mb-tabs {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.mb-tab {
+  background: none;
+  border: none;
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #7f8c8d;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.mb-tab-active {
+  color: #007AFF;
+}
+
+.mb-tab-active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: #007AFF;
+  border-radius: 3px 3px 0 0;
+}
+
+.mb-tab-badge {
+  background-color: #e0e0e0;
+  color: #7f8c8d;
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.mb-tab-active .mb-tab-badge {
+  background-color: #007AFF;
+  color: white;
+}
+
+.mb-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+}
+
+.mb-booking-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.mb-booking-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+.mb-booking-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.mb-booking-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.mb-status-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.mb-status-upcoming {
+  background-color: #e1f5fe;
+  color: #0288d1;
+}
+
+.mb-status-completed {
+  background-color: #e8f5e9;
+  color: #388e3c;
+}
+
+.mb-status-cancelled {
+  background-color: #ffebee;
+  color: #d32f2f;
+}
+
+.mb-booking-details {
+  margin-bottom: 20px;
+}
+
+.mb-detail-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.mb-detail-label {
+  font-weight: 500;
+  color: #7f8c8d;
+}
+
+.mb-detail-value {
+  font-weight: 600;
+  color: #2c3e50;
+  text-align: right;
+}
+
+.mb-city-truncate{
+  display: -webkit-box;           /* required for multi-line */
+  -webkit-line-clamp: 2;          /* number of lines to show */
+  -webkit-box-orient: vertical;   /* required for multi-line */
+  overflow: hidden;               /* hide the rest */
+  text-overflow: ellipsis;        /* add "..." */
+  word-break: break-word; 
+}
+
+.mb-amount {
+  color: #27ae60;
+  font-size: 1.1rem;
+}
+
+.mb-booking-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.mb-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mb-btn-cancel {
+  background-color: #ffebee;
+  color: #d32f2f;
+}
+
+.mb-btn-cancel:hover {
+  background-color: #ffcdd2;
+}
+
+.mb-btn-route {
+  background-color: #e3f2fd;
+  color: #1565c0;
+}
+
+.mb-btn-route:hover {
+  background-color: #bbdefb;
+}
+
+.mb-empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.mb-empty-state h3 {
+  color: #7f8c8d;
+  margin-bottom: 10px;
+}
+
+.mb-empty-state p {
+  color: #bdc3c7;
+  margin: 0;
+}
+
+.mb-loading {
   display: flex;
   flex-direction: column;
-  align-items: center; /* Center align booking item */
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
 }
 
-.booking-item p {
-  margin: 5px 0;
+.mb-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  animation: mb-spin 1s linear infinite;
+  margin-bottom: 16px;
 }
 
-.booking-item button {
-  padding: 8px 16px;
-  background-color: #e53935;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
+@keyframes mb-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-.booking-item button:hover {
-  background-color: #c62828;
-}
-.actions svg{
- margin-left: 600px;
- margin-top: -440px;
- width: 30px;
- height: 30px;
- color: #0056b3;
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .mb-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .mb-tabs {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .mb-tab {
+    justify-content: center;
+  }
+  
+  .mb-booking-actions {
+    flex-direction: column;
+  }
 }

@@ -1,165 +1,688 @@
-.wallet-containe {
-    width: 95%;
-    max-width: 500px;
-    padding: 30px;
-    background-color: white;
-    border-radius: 20px;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    position: relative; /* Ensure relative positioning for absolute elements inside */
+/* Wallet.css */
+.ad-wt-body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  background-color: #f8fafc;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
 }
 
-.wallet-container{
-    padding: 50px;
+.ad-wt-container {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0;
 }
 
-.wallet-details{
-    width: 200px;
+/* Header Styles */
+.ad-wt-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(10px);
 }
 
-.ultag{
-    width: 70%;
-    padding: 60px;
-    position: relative;
-    left: 200px;
+.ad-wt-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
-.wallet-header {
-    display: flex;
+
+.ad-wt-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.ad-wt-logo-icon {
+  color: #007AFF;
+}
+
+.ad-wt-header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.ad-wt-search {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.ad-wt-search:focus-within {
+  border-color: #007AFF;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+}
+
+.ad-wt-search input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 0.875rem;
+  width: 200px;
+}
+
+.ad-wt-search input::placeholder {
+  color: #94a3b8;
+}
+
+.ad-wt-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: #f8fafc;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.ad-wt-icon-btn:hover {
+  background: #f1f5f9;
+  transform: translateY(-1px);
+}
+
+.ad-wt-notification-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 8px;
+  height: 8px;
+  background: #ef4444;
+  border-radius: 50%;
+  border: 2px solid #fff;
+}
+
+.ad-wt-profile img {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 2px solid #e2e8f0;
+  transition: all 0.2s ease;
+}
+
+.ad-wt-profile img:hover {
+  border-color: #007AFF;
+}
+
+/* Dashboard Layout */
+.ad-wt-dashboard {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 1.5rem;
+  padding: 2rem;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+/* Left Panel Styles */
+.ad-wt-left-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.ad-wt-balance-card {
+  background: linear-gradient(135deg, #007AFF 0%, #0056b3 100%);
+  padding: 1.5rem;
+  border-radius: 20px;
+  color: white;
+  box-shadow: 0 10px 25px rgba(0, 122, 255, 0.2);
+}
+
+.ad-wt-balance-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.ad-wt-balance-title {
+  font-size: 0.875rem;
+  opacity: 0.9;
+  font-weight: 500;
+}
+
+.ad-wt-balance-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.ad-wt-balance-action {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+}
+
+.ad-wt-balance-action:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.ad-wt-balance-amount {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ad-wt-balance-growth {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  opacity: 0.9;
+  margin-bottom: 1.5rem;
+}
+
+.ad-wt-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.ad-wt-action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 0.5rem;
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.ad-wt-action-btn.primary {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  backdrop-filter: blur(10px);
+}
+
+.ad-wt-action-btn.primary:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.ad-wt-action-btn.secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  backdrop-filter: blur(10px);
+}
+
+.ad-wt-action-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.ad-wt-action-btn.tertiary {
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+  backdrop-filter: blur(10px);
+}
+
+.ad-wt-action-btn.tertiary:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+/* Stats Card */
+.ad-wt-stats-card {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.ad-wt-stats-card h3 {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.ad-wt-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.ad-wt-stat {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ad-wt-stat-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ad-wt-stat-icon.income {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.ad-wt-stat-icon.expense {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.ad-wt-stat-label {
+  font-size: 0.875rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.ad-wt-stat-value {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.ad-wt-progress-bar {
+  width: 100%;
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.ad-wt-progress-fill.income {
+  height: 100%;
+  background: #007AFF;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+/* Features Grid */
+.ad-wt-features {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.ad-wt-features h3 {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.ad-wt-features-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.ad-wt-feature-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ad-wt-feature-btn:hover {
+  border-color: #007AFF;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.1);
+}
+
+.ad-wt-feature-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #007AFF;
+  transition: all 0.2s ease;
+}
+
+.ad-wt-feature-btn:hover .ad-wt-feature-icon {
+  background: #007AFF;
+  color: white;
+}
+
+.ad-wt-feature-btn span {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+/* Right Panel Styles */
+.ad-wt-right-panel {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.ad-wt-transactions-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.ad-wt-transactions-header h2 {
+  margin: 0 0 1rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.ad-wt-transactions-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.ad-wt-tabs {
+  display: flex;
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 0.25rem;
+}
+
+.ad-wt-tab {
+  padding: 0.5rem 1rem;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #64748b;
+  transition: all 0.2s ease;
+}
+
+.ad-wt-tab.active {
+  background: #fff;
+  color: #007AFF;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ad-wt-filter-group {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.ad-wt-filter {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  position: relative;
+}
+
+.ad-wt-month-select {
+  border: none;
+  background: transparent;
+  font-size: 0.875rem;
+  color: #475569;
+  outline: none;
+  appearance: none;
+  padding-right: 1.5rem;
+}
+
+.ad-wt-select-arrow {
+  position: absolute;
+  right: 0.75rem;
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+/* Transactions List */
+.ad-wt-transactions-list {
+  padding: 0;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.ad-wt-transaction-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #f1f5f9;
+  transition: all 0.2s ease;
+}
+
+.ad-wt-transaction-item:hover {
+  background: #f8fafc;
+}
+
+.ad-wt-transaction-icon-bg {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ad-wt-transaction-icon-bg.income {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.ad-wt-transaction-icon-bg.expense {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.ad-wt-transaction-details {
+  flex: 1;
+}
+
+.ad-wt-transaction-name {
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 0.25rem;
+}
+
+.ad-wt-transaction-date {
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.ad-wt-transaction-amount {
+  font-weight: 600;
+  font-size: 1.125rem;
+}
+
+.ad-wt-positive {
+  color: #16a34a;
+}
+
+.ad-wt-negative {
+  color: #dc2626;
+}
+
+.ad-wt-transaction-action {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 8px;
+  color: #94a3b8;
+  transition: all 0.2s ease;
+}
+
+.ad-wt-transaction-action:hover {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.ad-wt-no-transactions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  text-align: center;
+  color: #94a3b8;
+}
+
+.ad-wt-no-transactions svg {
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.ad-wt-no-transactions p {
+  margin: 0 0 0.5rem 0;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.ad-wt-no-transactions span {
+  font-size: 0.875rem;
+}
+
+.ad-wt-transactions-footer {
+  padding: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  text-align: center;
+}
+
+.ad-wt-view-all-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #475569;
+  transition: all 0.2s ease;
+}
+
+.ad-wt-view-all-btn:hover {
+  border-color: #007AFF;
+  color: #007AFF;
+  transform: translateY(-1px);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .ad-wt-dashboard {
+    grid-template-columns: 1fr;
+  }
+  
+  .ad-wt-header-right {
+    gap: 0.5rem;
+  }
+  
+  .ad-wt-search input {
+    width: 150px;
+  }
+}
+
+@media (max-width: 768px) {
+  .ad-wt-header {
+    padding: 1rem;
+  }
+  
+  .ad-wt-dashboard {
+    padding: 1rem;
+  }
+  
+  .ad-wt-transactions-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .ad-wt-tabs {
+    width: 100%;
+  }
+  
+  .ad-wt-filter-group {
+    width: 100%;
+  }
+  
+  .ad-wt-actions {
+    grid-template-columns: 1fr;
+  }
+  
+  .ad-wt-features-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .ad-wt-header {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+  }
+  
+  .ad-wt-header-right {
+    width: 100%;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.wallet-profile {
-    display: flex;
-    align-items: center;
-}
-
-.wallet-profile img {
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    margin-right: 15px;
-}
-
-.wallet-welcome h2 {
-    margin: 0;
-    font-size: 22px;
-    color: #333;
-}
-
-.wallet-welcome p {
-    margin: 0;
-    color: #888;
-    font-size: 16px;
-}
-
-.wallet-balance {
-    display: flex;
-    justify-content: center;
-    margin: 20px 0;
-}
-
-.wallet-balance h1 {
-    font-size: 32px;
-    background: linear-gradient(90deg, #0661ea 0%, #3c78c8 100%);
-    -webkit-background-clip: text;
-    color: transparent;
-}
-
-.wallet-qr-code img {
-    width: 40px;
-    height: 40px;
-}
-
-.wallet-actions {
-    display: flex;
-    justify-content: space-around;
-    margin: 30px 0;
-}
-
-.wallet-action-btn {
-    background: linear-gradient(90deg, #0564eb 0%, #3b67b3 100%);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background 0.3s;
-}
-
-.wallet-action-btn:hover {
-    background: linear-gradient(90deg, #2f4280 0%, #2870a7 100%);
-}
-
-.wallet-transactions {
-    margin-top: 20px;
-    position: relative; /* Ensure relative positioning for absolute elements inside */
-}
-
-.wallet-transactions-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-}
-
-.wallet-transactions-header h3 {
-    margin: 0;
-    font-size: 20px;
-}
-
-.wallet-transactions-header select {
-    padding: 10px;
-    border-radius: 10px;
-    border: 1px solid #ddd;
-    font-size: 16px;
-}
-
-.wallet-transactions ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.wallet-transactions li {
-    display: flex;
-    align-items: center;
-    margin-bottom: 15px;
-    padding: 10px;
-    background-color: #f9f9f9;
-    border-radius: 15px;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.wallet-transactions li:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-}
-
-.wallet-transactions img {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    margin-right: 15px;
-}
-
-.wallet-details p {
-    margin: 0;
-    font-size: 18px;
-}
-
-.wallet-amount {
-    color: rgb(65, 123, 222);
-    font-weight: bold;
-}
-
-.wallet-amount.wallet-negative {
-    color: red;
-}
-
-.wallet-details p:nth-child(3) {
-    color: #888;
-    font-size: 14px;
+  }
+  
+  .ad-wt-search {
+    flex: 1;
+  }
+  
+  .ad-wt-search input {
+    width: 100%;
+  }
+  
+  .ad-wt-balance-amount {
+    font-size: 2rem;
+  }
+  
+  .ad-wt-transaction-item {
+    padding: 1rem;
+  }
 }

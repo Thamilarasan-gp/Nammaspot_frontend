@@ -1,135 +1,840 @@
-.slots-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+/* Myslots.css */
+.ad-ms-container {
+  max-width: 1400px;
+  margin: 0 auto;
   padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: #f8f9fa;
+  min-height: 100vh;
 }
 
-.slot-card {
-  background: linear-gradient(to right, #f9f9f9, #ffffff);
-  border: 1px solid #ddd;
+/* Notification */
+.ad-ms-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 16px 20px;
   border-radius: 12px;
-  padding: 20px;
-  width: 80%;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  animation: slideIn 0.3s ease;
+}
+
+.ad-ms-notification-success {
+  background-color: #4CAF50;
+  color: white;
+  border: 1px solid #45a049;
+}
+
+.ad-ms-notification-error {
+  background-color: #f44336;
+  color: white;
+  border: 1px solid #e53935;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Header */
+.ad-ms-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  margin-bottom: 30px;
+  background: white;
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.1);
 }
 
-.slot-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+.ad-ms-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
 }
 
-.slot-details p {
-  margin: 6px 0;
+.ad-ms-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ad-ms-view-toggle {
+  display: flex;
+  background: #f1f1f1;
+  border-radius: 12px;
+  padding: 4px;
+}
+
+.ad-ms-view-toggle button {
+  padding: 8px 12px;
+  border: none;
+  background: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #666;
+}
+
+.ad-ms-view-toggle button.active {
+  background: #007AFF;
+  color: white;
+}
+
+.ad-ms-view-toggle button:hover {
+  background: #e0e0e0;
+}
+
+.ad-ms-view-toggle button.active:hover {
+  background: #0056cc;
+}
+
+/* Controls */
+.ad-ms-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.ad-ms-search-container {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+}
+
+.ad-ms-search {
+  position: relative;
+  flex: 1;
+  max-width: 400px;
+}
+
+.ad-ms-search input {
+  width: 100%;
+  padding: 14px 16px 14px 48px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
   font-size: 16px;
+  transition: border-color 0.2s ease;
+  background: white;
+}
+
+.ad-ms-search input:focus {
+  outline: none;
+  border-color: #007AFF;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+}
+
+.ad-ms-search svg {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+}
+
+.ad-ms-filter-toggle {
+  padding: 12px 20px;
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.ad-ms-filter-toggle:hover {
+  border-color: #007AFF;
+  color: #007AFF;
+}
+
+.ad-ms-controls-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ad-ms-sort {
+  padding: 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  background: white;
+  font-size: 14px;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.ad-ms-sort:focus {
+  outline: none;
+  border-color: #007AFF;
+}
+
+.ad-ms-add-button {
+  padding: 12px 20px;
+  background: #007AFF;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.ad-ms-add-button:hover {
+  background: #0056cc;
+}
+
+/* Filters Panel */
+.ad-ms-filters-panel {
+  background: white;
+  padding: 24px;
+  border-radius: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.ad-ms-filters-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.ad-ms-filters-header h3 {
+  margin: 0;
+  color: #1a1a1a;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.ad-ms-clear-all {
+  padding: 8px 16px;
+  background: #ff3b30;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+}
+
+.ad-ms-clear-all:hover {
+  background: #d70015;
+}
+
+.ad-ms-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.ad-ms-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ad-ms-filter-group label {
+  font-weight: 500;
+  color: #333;
+  font-size: 14px;
+}
+
+.ad-ms-filter-group select,
+.ad-ms-filter-group input {
+  padding: 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+  background: white;
+}
+
+.ad-ms-filter-group select:focus,
+.ad-ms-filter-group input:focus {
+  outline: none;
+  border-color: #007AFF;
+}
+
+.ad-ms-price-input {
+  position: relative;
+}
+
+.ad-ms-price-input svg {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+}
+
+.ad-ms-price-input input {
+  padding-left: 36px !important;
+}
+
+/* Stats */
+.ad-ms-stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  background: white;
+  padding: 16px 24px;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+.ad-ms-stats p {
+  margin: 0;
+  font-weight: 500;
   color: #333;
 }
 
-.slot-actions {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-}
-
-.edit-button, .delete-button {
-  background-color: #007bff;
-  color: white;
+.ad-ms-clear-filters-btn {
+  padding: 8px 16px;
+  background: #f1f1f1;
   border: none;
-  padding: 10px 16px;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
-  margin-top: 6px;
-  width: 100%;
-  transition: background-color 0.3s ease, transform 0.3s ease;
-}
-
-.edit-button:hover, .delete-button:hover {
-  transform: scale(1.05);
-}
-
-.edit-button {
-  background-color: #28a745;
-  margin-top: -130px;
-
-}
-
-.delete-button {
-  background-color: #dc3545;
-  width: 100px;
-}
-
-.edit-form {
-  margin-top: 32px;
-  width: 80%;
+  font-size: 14px;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  margin-left: 160px;
+  gap: 6px;
+  transition: background-color 0.2s ease;
 }
 
-.edit-form input {
-  display: block;
-  margin-bottom: 14px;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  width: 100%;
-  box-sizing: border-box;
-  transition: border-color 0.3s ease;
+.ad-ms-clear-filters-btn:hover {
+  background: #e0e0e0;
 }
 
-.edit-form input:focus {
-  border-color: #007bff;
+/* Grid View */
+.ad-ms-slots-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 24px;
+  margin-bottom: 30px;
 }
 
-.edit-form button {
-  background-color: #1764bb;
+.ad-ms-slot-card {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ad-ms-slot-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 122, 255, 0.15);
+}
+
+.ad-ms-slot-image {
+  height: 100px;
+  background: linear-gradient(135deg, #007AFF, #0056cc);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.ad-ms-slot-price {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  font-size: 24px;
+  font-weight: 700;
+  color: white;
+}
+
+.ad-ms-slot-price span {
+  font-size: 14px;
+  font-weight: 400;
+  opacity: 0.9;
+}
+
+.ad-ms-slot-featured {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  backdrop-filter: blur(10px);
+}
+
+.ad-ms-slot-content {
+  padding: 24px;
+}
+
+.ad-ms-slot-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.ad-ms-slot-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.ad-ms-slot-status {
+  background: #4CAF50;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.ad-ms-slot-location {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #666;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.ad-ms-slot-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.ad-ms-slot-detail {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #555;
+  font-size: 14px;
+}
+
+.ad-ms-slot-description {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 20px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.ad-ms-slot-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.ad-ms-edit-btn,
+.ad-ms-delete-btn {
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.ad-ms-edit-btn {
+  background: #007AFF;
+  color: white;
+}
+
+.ad-ms-edit-btn:hover {
+  background: #0056cc;
+}
+
+.ad-ms-delete-btn {
+  background: #ff3b30;
+  color: white;
+}
+
+.ad-ms-delete-btn:hover {
+  background: #d70015;
+}
+
+/* List View */
+.ad-ms-slots-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+.ad-ms-slots-list .ad-ms-slot-card {
+  display: flex;
+}
+
+.ad-ms-slots-list .ad-ms-slot-image {
+  width: 230px;
+  height: auto;
+  flex-shrink: 0;
+}
+
+.ad-ms-slots-list .ad-ms-slot-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.ad-ms-slots-list .ad-ms-slot-header {
+  margin-bottom: 12px;
+}
+
+.ad-ms-slots-list .ad-ms-slot-details {
+  grid-template-columns: repeat(3, 1fr);
+  margin-bottom: 12px;
+}
+
+.ad-ms-slots-list .ad-ms-slot-actions {
+  margin-top: auto;
+}
+
+/* No Slots */
+.ad-ms-no-slots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.ad-ms-no-slots-content {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+.ad-ms-no-slots-content h3 {
+  margin: 20px 0 12px;
+  color: #333;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.ad-ms-no-slots-content p {
+  margin-bottom: 24px;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.ad-ms-no-slots-content button {
+  padding: 12px 24px;
+  background: #007AFF;
   color: white;
   border: none;
-  padding: 10px 14px;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.ad-ms-no-slots-content button:hover {
+  background: #0056cc;
+}
+
+/* Pagination */
+.ad-ms-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 30px;
+}
+
+.ad-ms-pagination-btn {
+  padding: 12px 20px;
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  color: #333;
+}
+
+.ad-ms-pagination-btn:hover:not(:disabled) {
+  border-color: #007AFF;
+  color: #007AFF;
+}
+
+.ad-ms-pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ad-ms-pagination-btn.active {
+  background: #007AFF;
+  border-color: #007AFF;
+  color: white;
+}
+
+.ad-ms-pagination-pages {
+  display: flex;
+  gap: 8px;
+}
+
+/* Edit Modal */
+.ad-ms-edit-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.ad-ms-edit-form {
+  background: white;
+  border-radius: 20px;
+  padding: 32px;
+  max-width: 600px;
   width: 100%;
-  transition: background-color 0.3s ease, transform 0.3s ease;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
 }
 
-.edit-form button:hover {
-  background-color: #0d4f91;
-  transform: scale(1.05);
+.ad-ms-edit-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #f1f1f1;
 }
 
-.deletebbutton {
-  background-color: #dc3545;
-  margin-top: 10px;
-  padding: 8px 14px;
-  border-radius: 6px;
-  border: none;
-  color: #ffffff;
-  transition: background-color 0.3s ease, transform 0.3s ease;
-}
-
-.deletebbutton:hover {
-  background-color: #c82333;
-  transform: scale(1.05);
-}
-
-#slotsdata {
-  margin-left: 650px;
-  margin-top: 50px;
-  padding-bottom: 50px;
-  color: #007bff;
-  font-weight: 800;
+.ad-ms-edit-header h2 {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #1a1a1a;
   font-size: 24px;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+  font-weight: 600;
 }
 
-#editslot {
-  color: #007bff;
-  font-size: 20px;
+.ad-ms-close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+  color: #666;
+}
+
+.ad-ms-close-btn:hover {
+  background: #f1f1f1;
+  color: #333;
+}
+
+.ad-ms-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
   margin-bottom: 20px;
+}
+
+.ad-ms-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ad-ms-input-group label {
+  font-weight: 500;
+  color: #333;
+  font-size: 14px;
+}
+
+.ad-ms-input-with-icon {
+  position: relative;
+}
+
+.ad-ms-input-with-icon svg {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+}
+
+.ad-ms-input-with-icon input {
+  width: 100%;
+  padding: 14px 16px 14px 48px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 16px;
+  transition: border-color 0.2s ease;
+  background: white;
+}
+
+.ad-ms-input-with-icon input:focus {
+  outline: none;
+  border-color: #007AFF;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+}
+
+.ad-ms-form-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: flex-end;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 2px solid #f1f1f1;
+}
+
+.ad-ms-cancel-btn {
+  padding: 14px 28px;
+  background: #f1f1f1;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+  color: #333;
+}
+
+.ad-ms-cancel-btn:hover {
+  background: #e0e0e0;
+}
+
+.ad-ms-update-btn {
+  padding: 14px 28px;
+  background: #007AFF;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.ad-ms-update-btn:hover {
+  background: #0056cc;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .ad-ms-container {
+    padding: 16px;
+  }
+  
+  .ad-ms-header {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+  
+  .ad-ms-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .ad-ms-search-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .ad-ms-search {
+    max-width: none;
+  }
+  
+  .ad-ms-controls-right {
+    flex-direction: column;
+  }
+  
+  .ad-ms-slots-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .ad-ms-slots-list .ad-ms-slot-card {
+    flex-direction: column;
+    height: auto;
+  }
+  
+  .ad-ms-slots-list .ad-ms-slot-image {
+    width: 100%;
+    height: 160px;
+  }
+  
+  .ad-ms-form-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .ad-ms-pagination {
+    flex-wrap: wrap;
+  }
+  
+  .ad-ms-pagination-pages {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .ad-ms-edit-form {
+    padding: 24px;
+    margin: 20px;
+  }
+  
+  .ad-ms-form-actions {
+    flex-direction: column;
+  }
 }

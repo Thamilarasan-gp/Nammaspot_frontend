@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import QRCode from "qrcode.react";  // Import the QR code library
-import "./Pingenerate.css"; // Import CSS file
+import QRCode from "qrcode.react";
+import "./Pingenerate.css";
 
 const Pin = () => {
   const location = useLocation();
@@ -11,6 +11,7 @@ const Pin = () => {
   const [recentData, setRecentData] = useState(null);
   const [mapData, setMapData] = useState(null);
   const [lastUserName, setLastUserName] = useState('');
+  const [qrValue, setQrValue] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -61,30 +62,106 @@ const Pin = () => {
       .catch(err => console.log(err));
   }, []);
 
-  return (
-    <div className="ticket-container">
-      <h1 className="ticket-header">Ticket</h1>
-      {recentData && (
-        <div className="ticket-details">
-        
-          <QRCode id="qrcode" value={pin} size={128} /> {/* QR code generation */}
-          <b>Token Number: <h6>{pin}</h6></b>
-          <b>Location: <h6>{recentData.city}</h6></b>
-          <b>Date: <h6>{recentData.date}</h6></b>
-          <b>Vehicle Number: <h6>{recentData.vehicleno}</h6></b>
-          <b>Entry Time: <h6>{recentData.entryTime}</h6></b>
-          <b>Exit Time: <h6>{recentData.exitTime}</h6></b>
-          <b>Slot Numbers: <h6>{recentData.slotNumbers.join(', ')}</h6></b>
-          <b>Payment Price: <h6>${recentData.totalAmount}</h6></b>
-          <Link to="/"><button className="btttn"><h5>OK</h5></button></Link>
-        </div>
-      )}
-     <div id="marque"> 
-    <div className="stay-tuned">Note* Make a Screenshot of Your Ticket </div>
-</div>
+  // Update QR code value when recentData is available
+  useEffect(() => {
+    if (pin && recentData) {
+      const qrData = {
+        token: pin,
+        slots: recentData.slotNumbers,
+        vehicle: recentData.vehicleno,
+        location: recentData.city,
+        exitTime: recentData.exitTime
+      };
+      setQrValue(JSON.stringify(qrData));
+    }
+  }, [pin, recentData]);
 
+  return (
+    <div className="us-pin-container">
+      <div className="us-pin-card">
+        <div className="us-pin-header">
+          <div className="us-pin-logo-container">
+            <div className="us-pin-logo">NS</div>
+            <h1>NammaSpot Ticket</h1>
+          </div>
+          <div className="us-pin-ribbon">CONFIRMED</div>
+        </div>
+        
+        <div className="us-pin-content">
+          <div className="us-pin-details">
+            <div className="us-pin-detail-row">
+              <div className="us-pin-detail-item">
+                <span className="us-pin-detail-label">Token Number</span>
+                <span className="us-pin-detail-value us-pin-highlight">{pin}</span>
+              </div>
+              <div className="us-pin-detail-item">
+                <span className="us-pin-detail-label">Date</span>
+                <span className="us-pin-detail-value">{recentData?.date || 'N/A'}</span>
+              </div>
+            </div>
+            
+            <div className="us-pin-detail-row">
+              <div className="us-pin-detail-item">
+                <span className="us-pin-detail-label">Location</span>
+                <span className="us-pin-detail-value">{recentData?.city || 'N/A'}</span>
+              </div>
+              <div className="us-pin-detail-item">
+                <span className="us-pin-detail-label">Vehicle No</span>
+                <span className="us-pin-detail-value">{recentData?.vehicleno || 'N/A'}</span>
+              </div>
+            </div>
+            
+            <div className="us-pin-detail-row">
+              <div className="us-pin-detail-item">
+                <span className="us-pin-detail-label">Entry Time</span>
+                <span className="us-pin-detail-value">{recentData?.entryTime || 'N/A'}</span>
+              </div>
+              <div className="us-pin-detail-item">
+                <span className="us-pin-detail-label">Exit Time</span>
+                <span className="us-pin-detail-value">{recentData?.exitTime || 'N/A'}</span>
+              </div>
+            </div>
+            
+            <div className="us-pin-detail-row">
+              <div className="us-pin-detail-item us-pin-full-width">
+                <span className="us-pin-detail-label">Slot Numbers</span>
+                <span className="us-pin-detail-value us-pin-slot-numbers">
+                  {recentData?.slotNumbers?.join(', ') || 'N/A'}
+                </span>
+              </div>
+            </div>
+            
+            <div className="us-pin-detail-row">
+              <div className="us-pin-detail-item us-pin-full-width">
+                <span className="us-pin-detail-label">Total Amount</span>
+                <span className="us-pin-detail-value us-pin-price">${recentData?.totalAmount || '0.00'}</span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="us-pin-qr-section">
+            <div className="us-pin-qr-container">
+              {qrValue ? (
+                <QRCode value={qrValue} size={140} />
+              ) : (
+                <div className="us-pin-qr-placeholder">Loading QR Code...</div>
+              )}
+              <p className="us-pin-scan-text">Scan QR code at entry</p>
+              <p className="us-pin-qr-info">Contains token & slot info</p>
+            </div>
+          </div>
+        </div>
+        
+        <div className="us-pin-footer">
+          <div className="us-pin-notice">
+            <i className="us-pin-icon">📸</i> Please take a screenshot of this ticket
+          </div>
+          <Link to="/" className="us-pin-confirm-button">
+            Done
+          </Link>
+        </div>
+      </div>
     </div>
-    
   );
 };
 

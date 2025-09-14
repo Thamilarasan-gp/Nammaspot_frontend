@@ -63,6 +63,7 @@ const SliderContainer = () => {
   };
 
   return (
+  
     <div className={`innovative-container ${scrolled ? 'scrolled' : ''}`} data-aos="fade-up" data-aos-duration="1000">
       <button className="backward-arrow arrow" onClick={handleLeftClick}>&larr;</button>
       <div className="carousel">
