@@ -95,7 +95,6 @@ const Footer = () => {
             <li>THAMILARASAN GP</li>
             <li>RAHUL R</li>
             <li>MAJIDHUSIAN J</li>
-            <li>JOYANDREW S</li>
           </ul>
         </div>
         <div className="footer-section">
