@@ -3,7 +3,9 @@ import AOS from 'aos';
 import 'aos/dist/aos.css'; // Import AOS CSS for styling
 import './ImgSlider.css';
 import { useLanguage } from './LanguageContext';
-
+import img1 from '../../assests/location[1].png'
+import img2 from '../../assests/money[1].png'
+import img3 from '../../assests/parking[1].png'
 const translations = {
   en: {
     smarterWay: "The smarter way to park",
@@ -79,8 +81,8 @@ const ImgSlider = () => {
               <b>{t.search}</b>
             </p>
             <p className="hover-texts">{t.searchDesc}</p>
-            <img className="initial-imgs" src="https://webstockreview.net/images/kickball-clipart-kids-17.png" alt="Initial Image" />
-            <img className="hover-imgs" src="https://parkingpal.in/assets/img/svg/parking.svg" alt="Hover Image" />
+            <img className="initial-imgs" src={img1} alt="Initial Image" />
+            <img className="hover-imgs" src={img1} alt="Hover Image" />
           </div>
         </div>
 
@@ -94,8 +96,8 @@ const ImgSlider = () => {
               <b>{t.book}</b>
             </p>
             <p className="hover-texts">{t.bookDesc}</p>
-            <img className="initial-imgs" src="https://parkingpal.in/assets/img/svg/bill.svg" alt="Initial Image" />
-            <img className="hover-imgs" src="https://parkingpal.in/assets/img/svg/bill.svg" alt="Hover Image" />
+            <img className="initial-imgs" src={img2} alt="Initial Image" />
+            <img className="hover-imgs" src={img2} alt="Hover Image" />
           </div>
         </div>
 
@@ -109,8 +111,8 @@ const ImgSlider = () => {
               <b>{t.park}</b>
             </p>
             <p className="hover-texts">{t.parkDesc}</p>
-            <img className="initial-imgs" src="https://parkingpal.in/assets/img/svg/parking-sign.svg" alt="Initial Image" />
-            <img className="hover-imgs" src="https://parkingpal.in/assets/img/svg/parking-sign.svg" alt="Hover Image" />
+            <img className="initial-imgs" src={img3} alt="Initial Image" />
+            <img className="hover-imgs" src={img3} alt="Hover Image" />
           </div>
         </div>
       </div>

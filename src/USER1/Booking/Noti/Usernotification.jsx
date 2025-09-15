@@ -112,7 +112,7 @@ const Usernotification = () => {
       <div className="us-nt-header">
         <div className="us-nt-header-content">
           <div className="us-nt-title-section">
-            <div className="us-nt-icon">🔔</div>
+           
             <h2 className="us-nt-title">{notifications}</h2>
             {data.length > 0 && (
               <span className="us-nt-count">{data.length}</span>

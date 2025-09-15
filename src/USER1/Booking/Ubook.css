@@ -37,6 +37,7 @@
 
 .us-bk-header-icon {
   color: white;
+  margin-left: 10px;
 }
 
 .us-bk-panel-title {
@@ -425,7 +426,7 @@
 .us-bk-live-status {
   position: absolute;
   top: 20px;
-  left: 20px;
+  right: 20px;
   display: flex;
   align-items: center;
   gap: 8px;

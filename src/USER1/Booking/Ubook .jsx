@@ -391,7 +391,7 @@ const ParkingGate = ({ position, type, isOpen }) => {
       {/* Sign */}
       <Html position={type === 'entrance' ? [-4, 6, 0] : [4, 6, 0]} center>
         <div className={`us-bk-gate-sign us-bk-gate-${type}`}>
-          {type === 'entrance' ? '🚗 ENTRANCE' : '🚗 EXIT'}
+          {type === 'entrance' ? 'ENTRANCE' : 'EXIT'}
         </div>
       </Html>
     </group>
@@ -841,7 +841,7 @@ const ParkingLotEnvironment = () => {
             <meshStandardMaterial color="#22c55e" emissive="#22c55e" emissiveIntensity={0.3} />
           </mesh>
           <Html position={[0, 4, 0]} center>
-            <div className="us-bk-kiosk-sign">💳 Smart Payment</div>
+           
           </Html>
         </group>
       ))}
@@ -1208,7 +1208,7 @@ const Legend = () => {
   return (
     <div className="us-bk-legend">
       <h4 className="us-bk-legend-title">
-        <Info size={16} />
+        <Info size={25} />
         Parking Legend
       </h4>
       <div className="us-bk-legend-item">
@@ -1240,27 +1240,27 @@ const ControlsGuide = () => {
   return (
     <div className="us-bk-controls-guide">
       <h4 className="us-bk-controls-title">
-        <MousePointer size={16} />
+        <MousePointer size={20} />
         3D Navigation
       </h4>
       <div className="us-bk-control-item">
-        <RotateCw size={14} />
+        <RotateCw size={20} />
         <span>Drag to rotate view</span>
       </div>
       <div className="us-bk-control-item">
-        <ZoomIn size={14} />
+        <ZoomIn size={20} />
         <span>Scroll to zoom in/out</span>
       </div>
       <div className="us-bk-control-item">
-        <MousePointer size={14} />
+        <MousePointer size={20} />
         <span>Click green slots to reserve</span>
       </div>
       <div className="us-bk-control-item">
-        <Car size={14} />
+        <Car size={20} />
         <span>Cars drive from entrance!</span>
       </div>
       <p className="us-bk-controls-tip">
-        <SparklesIcon size={12} />
+        <SparklesIcon size={20} />
         Watch realistic car animations and parking center features!
       </p>
     </div>
@@ -1399,7 +1399,7 @@ const ParkingBooking = () => {
       <div className="us-bk-side-panel">
         <div className="us-bk-panel-header">
           <div className="us-bk-header-icon-container">
-            <CarTaxiFront size={30} className="us-bk-header-icon" />
+            <CarTaxiFront size={50} className="us-bk-header-icon" />
           </div>
           <h2 className="us-bk-panel-title">Smart Parking</h2>
           <div className="us-bk-header-decoration"></div>
@@ -1407,7 +1407,7 @@ const ParkingBooking = () => {
         
         <div className="us-bk-form-group">
           <label className="us-bk-form-label">
-            <MapPin size={20} color='#007AFF'/>
+            <MapPin size={30} color='#007AFF'/>
             Premium Location:
           </label>
           <input
@@ -1416,14 +1416,14 @@ const ParkingBooking = () => {
             readOnly
           />
           <span className="us-bk-price-tag">
-            <DollarSign size={16} />
+            {/* <DollarSign size={16} /> */}
             ₹{pricePerHour}/hour • Secure • 24/7 Monitored
           </span>
         </div>
 
         <div className="us-bk-form-group">
           <label className="us-bk-form-label">
-            <Car size={20} color='#007AFF'/>
+            <Car size={30} color='#007AFF'/>
             Vehicle Registration:
           </label>
           <input
@@ -1438,7 +1438,7 @@ const ParkingBooking = () => {
 
         <div className="us-bk-form-group">
           <label className="us-bk-form-label">
-            <Calendar size={20} color='#007AFF'/>
+            <Calendar size={30} color='#007AFF'/>
             Parking Date:
           </label>
           <input
@@ -1453,7 +1453,7 @@ const ParkingBooking = () => {
         <div className="us-bk-time-grid">
           <div className="us-bk-form-group">
             <label className="us-bk-form-label">
-              <Clock size={20} color='#007AFF'/>
+              <Clock size={30} color='#007AFF'/>
               Entry Time:
             </label>
             <input
@@ -1466,7 +1466,7 @@ const ParkingBooking = () => {
 
           <div className="us-bk-form-group">
             <label className="us-bk-form-label">
-              <Clock size={20} color='#007AFF'/>
+              <Clock size={30} color='#007AFF'/>
               Exit Time:
             </label>
             <input
@@ -1480,7 +1480,7 @@ const ParkingBooking = () => {
 
         <div className="us-bk-summary-card">
           <div className="us-bk-summary-header">
-            <Shield size={16} />
+            <Shield size={30} />
             <span>Booking Summary</span>
           </div>
           <div className="us-bk-summary-item">
@@ -1512,21 +1512,21 @@ const ParkingBooking = () => {
           disabled={calculateSelectedSlots() === 0 || !date || !entryTime || !exitTime || !vehicleno}
           className="us-bk-book-button"
         >
-          <span>🚗 Reserve Parking ({calculateSelectedSlots()} slots)</span>
-          <ArrowRight size={20} />
+          <span>Reserve Parking ({calculateSelectedSlots()} slots)</span>
+          <ArrowRight size={30} />
         </button>
         
         <div className="us-bk-features-list">
           <div className="us-bk-feature-item">
-            <Camera size={14} />
+            <Camera size={28} />
             <span>24/7 Security Monitoring</span>
           </div>
           <div className="us-bk-feature-item">
-            <Zap size={14} />
+            <Zap size={28} />
             <span>EV Charging Available</span>
           </div>
           <div className="us-bk-feature-item">
-            <Users size={14} />
+            <Users size={28} />
             <span>Covered Parking Options</span>
           </div>
         </div>
@@ -1555,7 +1555,7 @@ const ParkingBooking = () => {
 
       {/* Navigation Help */}
       <div className="us-bk-navigation-help">
-        <Navigation size={16} />
+        <Navigation size={26} />
         <span>Navigate the most realistic parking center simulation</span>
       </div>
 

@@ -1,7 +1,11 @@
+
+
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Html5QrcodeScanner } from "html5-qrcode";
 import { useLanguage } from "../../../USER1/Homepage/LanguageContext";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "./Verify.css";
 
 const translations = {
@@ -135,17 +139,26 @@ const Verify = () => {
     axios
       .get("https://nammaspot-backend.onrender.com/getpins")
       .then((result) => setData(result.data))
-      .catch((err) => console.error(loadingError, err));
+      .catch((err) => {
+        console.error(loadingError, err);
+        toast.error(loadingError);
+      });
 
     axios
       .get("https://nammaspot-backend.onrender.com/getnumber")
       .then((result) => setLatestNumber(result.data.number))
-      .catch((err) => console.error(err));
+      .catch((err) => {
+        console.error(err);
+        toast.error("Error loading latest number");
+      });
 
     axios
       .get("https://nammaspot-backend.onrender.com/getname")
       .then((result) => setEmail(result.data.email))
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        console.log(err);
+        toast.error("Error loading email");
+      });
   }, [loadingError]);
 
   const handleVerify = () => {
@@ -159,6 +172,7 @@ const Verify = () => {
         setMatchedDoc(pinData);
         console.log(pinData)
         setPin(scannedData.token);
+        toast.success(successMatch);
         return;
       }
     }
@@ -168,9 +182,11 @@ const Verify = () => {
     if (pinData) {
       setMessage(successMatch);
       setMatchedDoc(pinData);
+      toast.success(successMatch);
     } else {
       setMessage(noMatch);
       setMatchedDoc(null);
+      toast.error(noMatch);
     }
   };
 
@@ -183,10 +199,17 @@ const Verify = () => {
           pin: parseInt(pinToUse),
           seatsToFree: seatsToFree.split(",").map((seat) => seat.trim()),
         })
-        .then(() => setMessage(slotsFreed))
-        .catch((err) => console.error(err));
+        .then(() => {
+          setMessage(slotsFreed);
+          toast.success(slotsFreed);
+        })
+        .catch((err) => {
+          console.error(err);
+          toast.error("Error freeing slots");
+        });
     } else {
       setMessage(pinNotFound);
+      toast.error(pinNotFound);
     }
   };
 
@@ -197,8 +220,11 @@ const Verify = () => {
         noti: youAreIn,
       });
       sendNotification(youAreIn);
+      toast.success(youAreIn);
+      console.log("toast");
     } catch (error) {
       console.error("Error sending notification:", error);
+      toast.error("Error processing IN action");
     }
   };
 
@@ -207,8 +233,10 @@ const Verify = () => {
       try {
         await requestOTP();
         setOTPSent(true);
+        toast.info("OTP sent successfully");
       } catch (error) {
         console.error("Error requesting OTP:", error);
+        toast.error("Error sending OTP");
       }
     } else {
       setNoti(youAreOut);
@@ -217,9 +245,11 @@ const Verify = () => {
           noti: youAreOut,
         });
         sendNotification(youAreOut);
+        toast.success(youAreOut);
         handleOut();
       } catch (error) {
         console.error("Error sending notification:", error);
+        toast.error("Error processing OUT action");
       }
     }
   };
@@ -250,15 +280,19 @@ const Verify = () => {
             noti: youAreOut,
           });
           sendNotification(youAreOut);
+          toast.success("OTP verified successfully");
           handleOut();
         } catch (error) {
           console.error("Error sending notification:", error);
+          toast.error("Error processing OUT action");
         }
       } else {
         console.log("Invalid OTP");
+        toast.error("Invalid OTP");
       }
     } catch (error) {
       console.error("Error verifying OTP:", error);
+      toast.error("Error verifying OTP");
     }
   };
 
@@ -283,6 +317,7 @@ const Verify = () => {
     } catch (error) {
       console.error("Error requesting OTP:", error);
       setMessage("Failed to request OTP. Please try again later.");
+      toast.error("Failed to request OTP");
     }
   };
 
@@ -295,7 +330,10 @@ const Verify = () => {
       .then((response) => {
         console.log("Notification sent:", response.data);
       })
-      .catch((err) => console.error("Error sending notification:", err));
+      .catch((err) => {
+        console.error("Error sending notification:", err);
+        toast.error("Error sending notification");
+      });
   };
 
   useEffect(() => {
@@ -321,9 +359,11 @@ const Verify = () => {
           console.log(pinData)  
           setMessage(successMatch);
           setMatchedDoc(pinData);
+          toast.success(successMatch);
         } else {
           setMessage(noMatch);
           setMatchedDoc(null);
+          toast.error(noMatch);
         }
 
         // Stop scanning after successful scan
@@ -333,6 +373,7 @@ const Verify = () => {
       } catch (error) {
         console.error("Error parsing QR code data:", error);
         setMessage("Invalid QR code format");
+        toast.error("Invalid QR code format");
       }
     };
 
@@ -351,6 +392,20 @@ const Verify = () => {
 
   return (
     <div className="ad-vf-app">
+      {/* React Toastify Container */}
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
+      
       <div className="ad-vf-body">
         <h1 className="ad-vf-title">{verify}</h1>
 
