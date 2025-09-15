@@ -134,7 +134,7 @@ const Pin = () => {
             <div className="us-pin-detail-row">
               <div className="us-pin-detail-item us-pin-full-width">
                 <span className="us-pin-detail-label">Total Amount</span>
-                <span className="us-pin-detail-value us-pin-price">${recentData?.totalAmount || '0.00'}</span>
+                <span className="us-pin-detail-value us-pin-price">₹{recentData?.totalAmount || '0.00'}</span>
               </div>
             </div>
           </div>
