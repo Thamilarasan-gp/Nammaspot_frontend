@@ -74,16 +74,17 @@ const Payment = ({ Total = 100 }) => {
       <div className="cartto">
         <h2 className='cartton'> Cart Total</h2>
         <div className='subtotal'><p>Subtotal</p>
-          <p>${Total}</p>
+          <p>₹ {Total}</p>
         </div>
         <div className='deliveryfee'>
           <p>Delivery Fee</p>
-          <p>$5</p>
+          <p>₹ 5</p>
         </div>
         <div className='totaln'>
-          <p>Total</p>
-          <p>${Total + 5}</p>
+          <p>₹ Total</p>
+          <p>{Total + 5}</p>
         </div>
+
 
         <button type='submit' onClick={handlePayment} className='proceed'>Proceed To Payment</button>
       </div>

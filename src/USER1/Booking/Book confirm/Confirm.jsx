@@ -105,7 +105,7 @@ const ConfirmationPage = () => {
       const orderUrl =
         "https://nammaspot-backend.onrender.com/api/payment/orders";
       const { data } = await axios.post(orderUrl, {
-        amount: parseInt(totalAmount * 100),
+        amount: parseInt(totalAmount),
       });
       initPayment(data.data);
     } catch (error) {
